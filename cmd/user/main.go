@@ -24,8 +24,16 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	accessJwtSecret, accessSecretSet := os.LookupEnv("ACCESS_JWT_SECRET")
+	refreshJwtSecret, refreshSecretSet := os.LookupEnv("REFRESH_JWT_SECRET")
+	if accessSecretSet == false || refreshSecretSet == false {
+		log.Fatalf("JWT secrets not set, exiting...")
+	}
+
+	userService := internalUser.NewServer(accessJwtSecret, refreshJwtSecret)
+
 	srv := grpc.NewServer()
-	user.RegisterUserServiceServer(srv, &internalUser.Server{})
+	user.RegisterUserServiceServer(srv, userService)
 	reflection.Register(srv)
 
 	log.Printf("user service listening on :%s", port)
