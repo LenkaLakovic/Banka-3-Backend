@@ -5,8 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-
-	//"github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	"html/template"
 	"log"
 	//"net/http"
@@ -57,7 +56,7 @@ func (s *Server) SendActivationEmail(ctx context.Context, req *notification.Acti
 	fmt.Println("Working directory:", wd)
 	//list of email we want to send to
 	to := strings.Split(req.ToAddr, ",")
-	templ, err := template.ParseFiles("/internal/notification/templates/activation")
+	templ, err := template.ParseFiles("templates/activation.html")
 	if err != nil {
 		log.Println("Cannot parse activation.html:", err)
 		return &notification.SuccessResponse{Successful: false}, nil
@@ -82,14 +81,17 @@ func (s *Server) SendActivationEmail(ctx context.Context, req *notification.Acti
 }
 func sendHTMLEmail(to []string, subject string, htmlBody string) error {
 
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+		return err
+	}
 	auth := smtp.PlainAuth(
 		"",
 		os.Getenv("FROM_EMAIL"),
 		os.Getenv("FROM_EMAIL_PASSWORD"),
 		os.Getenv("FROM_EMAIL_SMTP"),
 	)
-	log.Printf(os.Getenv("FROM_EMAIL_SMTP"), os.Getenv("FROM_EMAIL_PASSWORD"), os.Getenv("FROM_EMAIL"))
-
 	headers := []string{
 		"From: " + os.Getenv("FROM_EMAIL"),
 		"To: " + strings.Join(to, ","),

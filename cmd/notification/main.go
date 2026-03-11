@@ -10,6 +10,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	if port == "" {
 		port = "50051"
 	}
-	log.Printf("Listening on port %s", port)
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
