@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"banka-raf/gen/user"
+	internalUser "banka-raf/internal/user"
 	"fmt"
 	"log"
 	"net"

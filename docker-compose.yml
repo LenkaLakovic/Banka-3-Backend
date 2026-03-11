@@ -16,6 +16,7 @@ services:
       retries: 10
 
   user:
+    container_name: user
     build:
       context: .
       dockerfile: cmd/user/Dockerfile
@@ -29,6 +30,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  notification:
+    container_name: notification
+    build:
+      context: .
+      dockerfile: cmd/notification/Dockerfile
+    ports:
+      - "${NOTIFICATION_GRPC_PORT:-50052}:50051"
+    environment:
+      GRPC_PORT: "50051"
+      FROM_EMAIL: "${FROM_EMAIL}"
+      FROM_EMAIL_PASSWORD: "${FROM_EMAIL_PASSWORD}"
+      FROM_EMAIL_SMTP: "${FROM_EMAIL_SMTP}"
+      SMTP_ADDR: "${SMTP_ADDR}"
 
 volumes:
   pgdata:
