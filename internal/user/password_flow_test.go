@@ -67,7 +67,7 @@ func newTestServer(t *testing.T) (*Server, sqlmock.Sqlmock, *sql.DB) {
 		t.Fatalf("sqlmock.New: %v", err)
 	}
 
-	return NewServer("access", "refresh", db), mock, db
+	return NewServer("access", "refresh", db, nil), mock, db
 }
 
 func TestRequestPasswordResetUnknownEmailReturnsAccepted(t *testing.T) {
