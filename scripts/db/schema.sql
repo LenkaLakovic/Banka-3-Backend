@@ -122,3 +122,14 @@ CREATE TABLE IF NOT EXISTS card (
     card_limit      BIGINT,
     active          BOOLEAN         NOT NULL DEFAULT FALSE
 );
+
+CREATE TABLE IF NOT EXISTS ovlasceno_lice (
+    id              BIGSERIAL       PRIMARY KEY,
+    ime             VARCHAR(63)     NOT NULL,
+    prezime         VARCHAR(63)     NOT NULL,
+    datum_rodjenja  DATE            NOT NULL,
+    pol             VARCHAR(7)      NOT NULL,
+    email           VARCHAR(127)    NOT NULL,
+    phone_number    VARCHAR(15)     NOT NULL,
+    address         VARCHAR (255)   NOT NULL
+);
