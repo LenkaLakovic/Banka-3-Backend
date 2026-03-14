@@ -133,3 +133,17 @@ CREATE TABLE IF NOT EXISTS ovlasceno_lice (
     phone_number    VARCHAR(15)     NOT NULL,
     address         VARCHAR (255)   NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS payment (
+    transaction_id      BIGSERIAL       PRIMARY KEY,
+    from_account        VARCHAR(20)     REFERENCES account(number),
+    to_account          VARCHAR(20)     REFERENCES account(number),
+    start_amount        BIGINT          NOT NULL,
+    end_amount          BIGINT          NOT NULL,
+    commission          BIGINT          NOT NULL,
+    recipient_id        BIGINT          REFERENCES clients(id),
+    trascaction_code    INT             NOT NULL,
+    call_number         VARCHAR(31)     NOT NULL,
+    reason              VARCHAR(255)    NOT NULL,
+    timestamp           TIMESTAMP       NOT NULL DEFAULT NOW()
+);
