@@ -116,7 +116,7 @@ func (s *Server) ValidateAccessToken(ctx context.Context, req *userpb.ValidateTo
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, "invalid token")
 	}
 	return &userpb.ValidateTokenResponse{
 		Valid: token.Valid,
@@ -166,7 +166,7 @@ func (s *Server) Refresh(ctx context.Context, req *userpb.RefreshRequest) (*user
 
 	err = s.rotateRefreshToken(tx, email, hashValue(refreshToken), hashValue(newSignedToken), newExpiry.Time)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unauthenticated, "wrong token")
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -203,10 +203,28 @@ func (s *Server) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.L
 		}, nil
 	}
 
-	return &userpb.LoginResponse{
-		AccessToken:  "",
-		RefreshToken: "",
-	}, errors.New("wrong creds")
+	return nil, status.Error(codes.Unauthenticated, "wrong creds")
+}
+
+func (s *Server) Logout(ctx context.Context, req *userpb.LogoutRequest) (*userpb.LogoutResponse, error) {
+	email := req.Email
+	tx, err := s.database.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("starting transaction: %w", err)
+	}
+	defer tx.Rollback()
+	err = s.RevokeRefreshTokensByEmail(tx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, fmt.Errorf("committing transaction: %w", err)
+	}
+
+	return &userpb.LogoutResponse{
+		Success: true,
+	}, nil
 }
 
 func (s *Server) RequestPasswordReset(ctx context.Context, req *userpb.PasswordActionRequest) (*userpb.PasswordActionResponse, error) {
