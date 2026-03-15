@@ -224,3 +224,13 @@ CREATE TABLE IF NOT EXISTS laon_request (
     phone_contact               VARCHAR(20)         NOT NULL,
     account_id                  BIGINT              REFERENCES account(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
+CREATE TABLE IF NOT EXISTS verification_codes (
+    id              BIGSERIAL   PRIMARY KEY,
+    client_id       BIGINT      REFERENCES clients(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    transaction_id  BIGINT      REFERENCES payment(transaction_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    valid_until     TIMESTAMP   NOT NULL,
+    tries           INT         NOT NULL DEFAULT 0,
+    valid           BOOLEAN     NOT NULL DEFAULT TRUE,
+    used            BOOLEAN     NOT NULL DEFAULT FALSE
+);
