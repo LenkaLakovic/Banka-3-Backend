@@ -184,13 +184,14 @@ CREATE TABLE IF NOT EXISTS loan (
     account_id          BIGINT              REFERENCES account(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     amount              DECIMAL(12, 2)      NOT NULL,
     currency_id         BIGSERIAL           REFERENCES currency(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    rates               BIGINT              NOT NULL,
+    installments        BIGINT              NOT NULL,
     interest_rate       DECIMAL (5, 2)      NOT NULL,
     date_signed         DATE                NOT NULL,
     date_end            DATE                NOT NULL,
     monthly_payment     DECIMAL(20, 2)      NOT NULL,
     next_payment_due    DATE                NOT NULL,
     remaining_debt      DECIMAL(20, 2)      NOT NULL,
+    type                loan_type           NOT NULL,
     loan_status         loan_status         NOT NULL DEFAULT 'approved',
     interest_rate_type  interest_rate_type  NOT NULL
 );
@@ -206,4 +207,20 @@ CREATE TABLE IF NOT EXISTS loan_installment (
     due_date            DATE                NOT NULL,
     paid_date           DATE                NOT NULL,
     status              installment_status  NOT NULL DEFAULT 'due'
+);
+
+CREATE TYPE employment_status AS ENUM ('full_time', 'temporary', 'unemployed');
+
+CREATE TABLE IF NOT EXISTS laon_request (
+    id                          BIGSERIAL           PRIMARY KEY,
+    type                        loan_type           NOT NULL,
+    interest_rate_type          interest_rate_type  NOT NULL,
+    purpose                     VARCHAR(1023)       NOT NULL,
+    montly_installment          DECIMAL(20, 2)      NOT NULL,
+    currency_id                 BIGINT              REFERENCES currency(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    amount                      DECIMAL(20, 2)      NOT NULL,
+    employment_status           employment_status   NOT NULL,
+    current_employment_time     BIGINT              NOT NULL,
+    phone_contact               VARCHAR(20)         NOT NULL,
+    account_id                  BIGINT              REFERENCES account(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
