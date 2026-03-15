@@ -165,13 +165,32 @@ CREATE TABLE IF NOT EXISTS transfer (
     start_amount        BIGINT          NOT NULL,
     end_amount          BIGINT          NOT NULL,
     start_currency_id   BIGINT          REFERENCES currency(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    exchange_rate       DECIMAL(10,2),
+    exchange_rate       DECIMAL(20,2),
     commission          BIGINT          NOT NULL,
     timestamp           TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS payment_code(
+CREATE TABLE IF NOT EXISTS payment_code (
     code        BIGINT          PRIMARY KEY,
-    description VARCHAR(255)    NOT NULL,
+    description VARCHAR(255)    NOT NULL
 );
 
+CREATE TYPE loan_type AS ENUM ('cash', 'mortgage', 'car', 'refinancing', 'student');
+CREATE TYPE loan_status AS ENUM ('approved', 'rejected', 'paid', 'late');
+CREATE TYPE interest_rate_type AS ENUM ('fixed', 'variable');
+
+CREATE TABLE IF NOT EXISTS loan (
+    id                  BIGSERIAL           PRIMARY KEY,
+    account_id          BIGINT              REFERENCES account(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    amount              DECIMAL(12, 2)      NOT NULL,
+    currency_id         BIGSERIAL           REFERENCES currency(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    rates               BIGINT              NOT NULL,
+    interest_rate       DECIMAL (5, 2)      NOT NULL,
+    date_signed         DATE                NOT NULL,
+    date_end            DATE                NOT NULL,
+    monthly_payment     DECIMAL(20, 2)      NOT NULL,
+    next_payment_due    DATE                NOT NULL,
+    remaining_debt      DECIMAL(20, 2)      NOT NULL,
+    loan_status         loan_status         NOT NULL DEFAULT 'approved',
+    interest_rate_type  interest_rate_type  NOT NULL
+);
