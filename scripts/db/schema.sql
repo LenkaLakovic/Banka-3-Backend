@@ -169,3 +169,9 @@ CREATE TABLE IF NOT EXISTS transfer (
     commission          BIGINT          NOT NULL,
     timestamp           TIMESTAMP       NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS payment_code(
+    code        BIGINT          PRIMARY KEY,
+    description VARCHAR(255)    NOT NULL,
+);
+
