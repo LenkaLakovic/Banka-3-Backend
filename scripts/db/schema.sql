@@ -194,3 +194,16 @@ CREATE TABLE IF NOT EXISTS loan (
     loan_status         loan_status         NOT NULL DEFAULT 'approved',
     interest_rate_type  interest_rate_type  NOT NULL
 );
+
+CREATE TYPE installment_status AS ENUM ('paid', 'due', 'late');
+
+CREATE TABLE IF NOT EXISTS loan_installment (
+    id                  BIGSERIAL           PRIMARY KEY,
+    loan_id             BIGINT              REFERENCES loan(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    installment_amount  DECIMAL(20,2)       NOT NULL,
+    interest_rate       DECIMAL(5, 2)       NOT NULL,
+    currency_id         BIGSERIAL           REFERENCES currency(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    due_date            DATE                NOT NULL,
+    paid_date           DATE                NOT NULL,
+    status              installment_status  NOT NULL DEFAULT 'due'
+);
