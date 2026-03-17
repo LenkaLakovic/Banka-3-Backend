@@ -35,6 +35,8 @@ func SetupApi(router *gin.Engine, server *Server) {
 	{
 		employees.POST("", server.CreateEmployeeAccount)
 		employees.GET("/:id", server.GetEmployeeByID)
+		employees.GET("", server.GetEmployees)
+		employees.PUT("/:id", server.UpdateEmployee)
 	}
 }
 
@@ -212,6 +214,14 @@ func (s *Server) GetEmployeeByID(c *gin.Context) {
 		"position":   resp.Position,
 		"active":     resp.Active,
 	})
+}
+
+func (s *Server) GetEmployees(c *gin.Context) {
+
+}
+
+func (s *Server) UpdateEmployee(c *gin.Context) {
+
 }
 
 func (s *Server) RequestPasswordReset(c *gin.Context) {
