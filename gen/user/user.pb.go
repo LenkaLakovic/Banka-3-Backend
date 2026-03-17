@@ -1569,6 +1569,362 @@ func (x *CreateClientResponse) GetValid() bool {
 	return false
 }
 
+type Client struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`
+	FirstName     string                 `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
+	LastName      string                 `protobuf:"bytes,3,opt,name=LastName,proto3" json:"LastName,omitempty"`
+	DateOfBirth   int64                  `protobuf:"varint,4,opt,name=DateOfBirth,proto3" json:"DateOfBirth,omitempty"`
+	Gender        string                 `protobuf:"bytes,5,opt,name=Gender,proto3" json:"Gender,omitempty"`
+	Email         string                 `protobuf:"bytes,6,opt,name=Email,proto3" json:"Email,omitempty"`
+	PhoneNumber   string                 `protobuf:"bytes,7,opt,name=PhoneNumber,proto3" json:"PhoneNumber,omitempty"`
+	Address       string                 `protobuf:"bytes,8,opt,name=Address,proto3" json:"Address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Client) Reset() {
+	*x = Client{}
+	mi := &file_user_user_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Client) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Client) ProtoMessage() {}
+
+func (x *Client) ProtoReflect() protoreflect.Message {
+	mi := &file_user_user_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Client.ProtoReflect.Descriptor instead.
+func (*Client) Descriptor() ([]byte, []int) {
+	return file_user_user_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *Client) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Client) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *Client) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *Client) GetDateOfBirth() int64 {
+	if x != nil {
+		return x.DateOfBirth
+	}
+	return 0
+}
+
+func (x *Client) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
+func (x *Client) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *Client) GetPhoneNumber() string {
+	if x != nil {
+		return x.PhoneNumber
+	}
+	return ""
+}
+
+func (x *Client) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type GetClientsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FirstName     string                 `protobuf:"bytes,1,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
+	LastName      string                 `protobuf:"bytes,2,opt,name=LastName,proto3" json:"LastName,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=Email,proto3" json:"Email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClientsRequest) Reset() {
+	*x = GetClientsRequest{}
+	mi := &file_user_user_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClientsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClientsRequest) ProtoMessage() {}
+
+func (x *GetClientsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_user_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClientsRequest.ProtoReflect.Descriptor instead.
+func (*GetClientsRequest) Descriptor() ([]byte, []int) {
+	return file_user_user_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *GetClientsRequest) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *GetClientsRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *GetClientsRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type GetClientsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Clients       []*Client              `protobuf:"bytes,1,rep,name=Clients,proto3" json:"Clients,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClientsResponse) Reset() {
+	*x = GetClientsResponse{}
+	mi := &file_user_user_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClientsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClientsResponse) ProtoMessage() {}
+
+func (x *GetClientsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_user_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClientsResponse.ProtoReflect.Descriptor instead.
+func (*GetClientsResponse) Descriptor() ([]byte, []int) {
+	return file_user_user_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *GetClientsResponse) GetClients() []*Client {
+	if x != nil {
+		return x.Clients
+	}
+	return nil
+}
+
+type UpdateClientRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`
+	FirstName     string                 `protobuf:"bytes,2,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
+	LastName      string                 `protobuf:"bytes,3,opt,name=LastName,proto3" json:"LastName,omitempty"`
+	DateOfBirth   int64                  `protobuf:"varint,4,opt,name=DateOfBirth,proto3" json:"DateOfBirth,omitempty"`
+	Gender        string                 `protobuf:"bytes,5,opt,name=Gender,proto3" json:"Gender,omitempty"`
+	Email         string                 `protobuf:"bytes,6,opt,name=Email,proto3" json:"Email,omitempty"`
+	PhoneNumber   string                 `protobuf:"bytes,7,opt,name=PhoneNumber,proto3" json:"PhoneNumber,omitempty"`
+	Address       string                 `protobuf:"bytes,8,opt,name=Address,proto3" json:"Address,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateClientRequest) Reset() {
+	*x = UpdateClientRequest{}
+	mi := &file_user_user_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateClientRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateClientRequest) ProtoMessage() {}
+
+func (x *UpdateClientRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_user_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateClientRequest.ProtoReflect.Descriptor instead.
+func (*UpdateClientRequest) Descriptor() ([]byte, []int) {
+	return file_user_user_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *UpdateClientRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateClientRequest) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+func (x *UpdateClientRequest) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *UpdateClientRequest) GetDateOfBirth() int64 {
+	if x != nil {
+		return x.DateOfBirth
+	}
+	return 0
+}
+
+func (x *UpdateClientRequest) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
+func (x *UpdateClientRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *UpdateClientRequest) GetPhoneNumber() string {
+	if x != nil {
+		return x.PhoneNumber
+	}
+	return ""
+}
+
+func (x *UpdateClientRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+type UpdateClientResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Valid         bool                   `protobuf:"varint,1,opt,name=Valid,proto3" json:"Valid,omitempty"`
+	Response      string                 `protobuf:"bytes,2,opt,name=Response,proto3" json:"Response,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateClientResponse) Reset() {
+	*x = UpdateClientResponse{}
+	mi := &file_user_user_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateClientResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateClientResponse) ProtoMessage() {}
+
+func (x *UpdateClientResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_user_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateClientResponse.ProtoReflect.Descriptor instead.
+func (*UpdateClientResponse) Descriptor() ([]byte, []int) {
+	return file_user_user_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *UpdateClientResponse) GetValid() bool {
+	if x != nil {
+		return x.Valid
+	}
+	return false
+}
+
+func (x *UpdateClientResponse) GetResponse() string {
+	if x != nil {
+		return x.Response
+	}
+	return ""
+}
+
 type GetEmployeesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FirstName     string                 `protobuf:"bytes,1,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
@@ -1581,7 +1937,7 @@ type GetEmployeesRequest struct {
 
 func (x *GetEmployeesRequest) Reset() {
 	*x = GetEmployeesRequest{}
-	mi := &file_user_user_proto_msgTypes[27]
+	mi := &file_user_user_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1593,7 +1949,7 @@ func (x *GetEmployeesRequest) String() string {
 func (*GetEmployeesRequest) ProtoMessage() {}
 
 func (x *GetEmployeesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[27]
+	mi := &file_user_user_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1606,7 +1962,7 @@ func (x *GetEmployeesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetEmployeesRequest.ProtoReflect.Descriptor instead.
 func (*GetEmployeesRequest) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{27}
+	return file_user_user_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GetEmployeesRequest) GetFirstName() string {
@@ -1646,7 +2002,7 @@ type GetEmployeesResponse struct {
 
 func (x *GetEmployeesResponse) Reset() {
 	*x = GetEmployeesResponse{}
-	mi := &file_user_user_proto_msgTypes[28]
+	mi := &file_user_user_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1658,7 +2014,7 @@ func (x *GetEmployeesResponse) String() string {
 func (*GetEmployeesResponse) ProtoMessage() {}
 
 func (x *GetEmployeesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[28]
+	mi := &file_user_user_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1671,7 +2027,7 @@ func (x *GetEmployeesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetEmployeesResponse.ProtoReflect.Descriptor instead.
 func (*GetEmployeesResponse) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{28}
+	return file_user_user_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *GetEmployeesResponse) GetEmployees() []*GetEmployeesResponse_Employee {
@@ -1690,7 +2046,7 @@ type GetEmployeeByIdRequest struct {
 
 func (x *GetEmployeeByIdRequest) Reset() {
 	*x = GetEmployeeByIdRequest{}
-	mi := &file_user_user_proto_msgTypes[29]
+	mi := &file_user_user_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1702,7 +2058,7 @@ func (x *GetEmployeeByIdRequest) String() string {
 func (*GetEmployeeByIdRequest) ProtoMessage() {}
 
 func (x *GetEmployeeByIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[29]
+	mi := &file_user_user_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1715,7 +2071,7 @@ func (x *GetEmployeeByIdRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetEmployeeByIdRequest.ProtoReflect.Descriptor instead.
 func (*GetEmployeeByIdRequest) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{29}
+	return file_user_user_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *GetEmployeeByIdRequest) GetId() int64 {
@@ -1746,7 +2102,7 @@ type GetEmployeeByIdResponse struct {
 
 func (x *GetEmployeeByIdResponse) Reset() {
 	*x = GetEmployeeByIdResponse{}
-	mi := &file_user_user_proto_msgTypes[30]
+	mi := &file_user_user_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1758,7 +2114,7 @@ func (x *GetEmployeeByIdResponse) String() string {
 func (*GetEmployeeByIdResponse) ProtoMessage() {}
 
 func (x *GetEmployeeByIdResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[30]
+	mi := &file_user_user_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1771,7 +2127,7 @@ func (x *GetEmployeeByIdResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetEmployeeByIdResponse.ProtoReflect.Descriptor instead.
 func (*GetEmployeeByIdResponse) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{30}
+	return file_user_user_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetEmployeeByIdResponse) GetId() int64 {
@@ -1882,7 +2238,7 @@ type UpdateEmployeeRequest struct {
 
 func (x *UpdateEmployeeRequest) Reset() {
 	*x = UpdateEmployeeRequest{}
-	mi := &file_user_user_proto_msgTypes[31]
+	mi := &file_user_user_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1894,7 +2250,7 @@ func (x *UpdateEmployeeRequest) String() string {
 func (*UpdateEmployeeRequest) ProtoMessage() {}
 
 func (x *UpdateEmployeeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[31]
+	mi := &file_user_user_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1907,7 +2263,7 @@ func (x *UpdateEmployeeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateEmployeeRequest.ProtoReflect.Descriptor instead.
 func (*UpdateEmployeeRequest) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{31}
+	return file_user_user_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UpdateEmployeeRequest) GetId() int64 {
@@ -1983,7 +2339,7 @@ type UpdateEmployeeResponse struct {
 
 func (x *UpdateEmployeeResponse) Reset() {
 	*x = UpdateEmployeeResponse{}
-	mi := &file_user_user_proto_msgTypes[32]
+	mi := &file_user_user_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1995,7 +2351,7 @@ func (x *UpdateEmployeeResponse) String() string {
 func (*UpdateEmployeeResponse) ProtoMessage() {}
 
 func (x *UpdateEmployeeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[32]
+	mi := &file_user_user_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2008,7 +2364,7 @@ func (x *UpdateEmployeeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateEmployeeResponse.ProtoReflect.Descriptor instead.
 func (*UpdateEmployeeResponse) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{32}
+	return file_user_user_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *UpdateEmployeeResponse) GetValid() bool {
@@ -2041,7 +2397,7 @@ type GetEmployeesResponse_Employee struct {
 
 func (x *GetEmployeesResponse_Employee) Reset() {
 	*x = GetEmployeesResponse_Employee{}
-	mi := &file_user_user_proto_msgTypes[33]
+	mi := &file_user_user_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2053,7 +2409,7 @@ func (x *GetEmployeesResponse_Employee) String() string {
 func (*GetEmployeesResponse_Employee) ProtoMessage() {}
 
 func (x *GetEmployeesResponse_Employee) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[33]
+	mi := &file_user_user_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2066,7 +2422,7 @@ func (x *GetEmployeesResponse_Employee) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetEmployeesResponse_Employee.ProtoReflect.Descriptor instead.
 func (*GetEmployeesResponse_Employee) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{28, 0}
+	return file_user_user_proto_rawDescGZIP(), []int{33, 0}
 }
 
 func (x *GetEmployeesResponse_Employee) GetId() int64 {
@@ -2234,7 +2590,34 @@ const file_user_user_proto_rawDesc = "" +
 	"\aAddress\x18\a \x01(\tR\aAddress\x12\x1a\n" +
 	"\bpassword\x18\b \x01(\tR\bpassword\",\n" +
 	"\x14CreateClientResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\"\x81\x01\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid\"\xde\x01\n" +
+	"\x06Client\x12\x0e\n" +
+	"\x02Id\x18\x01 \x01(\x03R\x02Id\x12\x1c\n" +
+	"\tFirstName\x18\x02 \x01(\tR\tFirstName\x12\x1a\n" +
+	"\bLastName\x18\x03 \x01(\tR\bLastName\x12 \n" +
+	"\vDateOfBirth\x18\x04 \x01(\x03R\vDateOfBirth\x12\x16\n" +
+	"\x06Gender\x18\x05 \x01(\tR\x06Gender\x12\x14\n" +
+	"\x05Email\x18\x06 \x01(\tR\x05Email\x12 \n" +
+	"\vPhoneNumber\x18\a \x01(\tR\vPhoneNumber\x12\x18\n" +
+	"\aAddress\x18\b \x01(\tR\aAddress\"c\n" +
+	"\x11GetClientsRequest\x12\x1c\n" +
+	"\tFirstName\x18\x01 \x01(\tR\tFirstName\x12\x1a\n" +
+	"\bLastName\x18\x02 \x01(\tR\bLastName\x12\x14\n" +
+	"\x05Email\x18\x03 \x01(\tR\x05Email\"<\n" +
+	"\x12GetClientsResponse\x12&\n" +
+	"\aClients\x18\x01 \x03(\v2\f.user.ClientR\aClients\"\xeb\x01\n" +
+	"\x13UpdateClientRequest\x12\x0e\n" +
+	"\x02Id\x18\x01 \x01(\x03R\x02Id\x12\x1c\n" +
+	"\tFirstName\x18\x02 \x01(\tR\tFirstName\x12\x1a\n" +
+	"\bLastName\x18\x03 \x01(\tR\bLastName\x12 \n" +
+	"\vDateOfBirth\x18\x04 \x01(\x03R\vDateOfBirth\x12\x16\n" +
+	"\x06Gender\x18\x05 \x01(\tR\x06Gender\x12\x14\n" +
+	"\x05Email\x18\x06 \x01(\tR\x05Email\x12 \n" +
+	"\vPhoneNumber\x18\a \x01(\tR\vPhoneNumber\x12\x18\n" +
+	"\aAddress\x18\b \x01(\tR\aAddress\"H\n" +
+	"\x14UpdateClientResponse\x12\x14\n" +
+	"\x05Valid\x18\x01 \x01(\bR\x05Valid\x12\x1a\n" +
+	"\bResponse\x18\x02 \x01(\tR\bResponse\"\x81\x01\n" +
 	"\x13GetEmployeesRequest\x12\x1c\n" +
 	"\tFirstName\x18\x01 \x01(\tR\tFirstName\x12\x1a\n" +
 	"\bLastName\x18\x02 \x01(\tR\bLastName\x12\x14\n" +
@@ -2284,8 +2667,7 @@ const file_user_user_proto_rawDesc = "" +
 	"\x05perms\x18\t \x03(\v2\x11.user.PermissionsR\x05perms\"J\n" +
 	"\x16UpdateEmployeeResponse\x12\x14\n" +
 	"\x05Valid\x18\x01 \x01(\bR\x05Valid\x12\x1a\n" +
-	"\bresponse\x18\x02 \x01(\tR\bresponse2\x85\n" +
-	"\n" +
+	"\bresponse\x18\x02 \x01(\tR\bresponse2\x8d\v\n" +
 	"\vUserService\x12N\n" +
 	"\x0fGetEmployeeById\x12\x1c.user.GetEmployeeByIdRequest\x1a\x1d.user.GetEmployeeByIdResponse\x12E\n" +
 	"\fGetEmployees\x12\x19.user.GetEmployeesRequest\x1a\x1a.user.GetEmployeesResponse\x12K\n" +
@@ -2302,7 +2684,10 @@ const file_user_user_proto_rawDesc = "" +
 	"\x14RequestPasswordReset\x12\x1b.user.PasswordActionRequest\x1a\x1c.user.PasswordActionResponse\x12V\n" +
 	"\x19RequestInitialPasswordSet\x12\x1b.user.PasswordActionRequest\x1a\x1c.user.PasswordActionResponse\x12]\n" +
 	"\x14SetPasswordWithToken\x12!.user.SetPasswordWithTokenRequest\x1a\".user.SetPasswordWithTokenResponse\x12L\n" +
-	"\x13CreateClientAccount\x12\x19.user.CreateClientRequest\x1a\x1a.user.CreateClientResponse\x12R\n" +
+	"\x13CreateClientAccount\x12\x19.user.CreateClientRequest\x1a\x1a.user.CreateClientResponse\x12?\n" +
+	"\n" +
+	"GetClients\x12\x17.user.GetClientsRequest\x1a\x18.user.GetClientsResponse\x12E\n" +
+	"\fUpdateClient\x12\x19.user.UpdateClientRequest\x1a\x1a.user.UpdateClientResponse\x12R\n" +
 	"\x15CreateEmployeeAccount\x12\x1b.user.CreateEmployeeRequest\x1a\x1c.user.CreateEmployeeResponseB1Z/github.com/RAF-SI-2025/Banka-3-Backend/gen/userb\x06proto3"
 
 var (
@@ -2317,7 +2702,7 @@ func file_user_user_proto_rawDescGZIP() []byte {
 	return file_user_user_proto_rawDescData
 }
 
-var file_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
+var file_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_user_user_proto_goTypes = []any{
 	(*ValidateTokenRequest)(nil),          // 0: user.ValidateTokenRequest
 	(*ValidateTokenResponse)(nil),         // 1: user.ValidateTokenResponse
@@ -2346,62 +2731,72 @@ var file_user_user_proto_goTypes = []any{
 	(*CreateEmployeeResponse)(nil),        // 24: user.CreateEmployeeResponse
 	(*CreateClientRequest)(nil),           // 25: user.CreateClientRequest
 	(*CreateClientResponse)(nil),          // 26: user.CreateClientResponse
-	(*GetEmployeesRequest)(nil),           // 27: user.GetEmployeesRequest
-	(*GetEmployeesResponse)(nil),          // 28: user.GetEmployeesResponse
-	(*GetEmployeeByIdRequest)(nil),        // 29: user.GetEmployeeByIdRequest
-	(*GetEmployeeByIdResponse)(nil),       // 30: user.GetEmployeeByIdResponse
-	(*UpdateEmployeeRequest)(nil),         // 31: user.UpdateEmployeeRequest
-	(*UpdateEmployeeResponse)(nil),        // 32: user.UpdateEmployeeResponse
-	(*GetEmployeesResponse_Employee)(nil), // 33: user.GetEmployeesResponse.Employee
+	(*Client)(nil),                        // 27: user.Client
+	(*GetClientsRequest)(nil),             // 28: user.GetClientsRequest
+	(*GetClientsResponse)(nil),            // 29: user.GetClientsResponse
+	(*UpdateClientRequest)(nil),           // 30: user.UpdateClientRequest
+	(*UpdateClientResponse)(nil),          // 31: user.UpdateClientResponse
+	(*GetEmployeesRequest)(nil),           // 32: user.GetEmployeesRequest
+	(*GetEmployeesResponse)(nil),          // 33: user.GetEmployeesResponse
+	(*GetEmployeeByIdRequest)(nil),        // 34: user.GetEmployeeByIdRequest
+	(*GetEmployeeByIdResponse)(nil),       // 35: user.GetEmployeeByIdResponse
+	(*UpdateEmployeeRequest)(nil),         // 36: user.UpdateEmployeeRequest
+	(*UpdateEmployeeResponse)(nil),        // 37: user.UpdateEmployeeResponse
+	(*GetEmployeesResponse_Employee)(nil), // 38: user.GetEmployeesResponse.Employee
 }
 var file_user_user_proto_depIdxs = []int32{
 	2,  // 0: user.CreateCompanyResponse.company:type_name -> user.Company
 	2,  // 1: user.GetCompanyByIdResponse.company:type_name -> user.Company
 	2,  // 2: user.GetCompaniesResponse.companies:type_name -> user.Company
 	2,  // 3: user.UpdateCompanyResponse.company:type_name -> user.Company
-	33, // 4: user.GetEmployeesResponse.Employees:type_name -> user.GetEmployeesResponse.Employee
-	22, // 5: user.GetEmployeeByIdResponse.perms:type_name -> user.Permissions
-	22, // 6: user.UpdateEmployeeRequest.perms:type_name -> user.Permissions
-	22, // 7: user.GetEmployeesResponse.Employee.perms:type_name -> user.Permissions
-	29, // 8: user.UserService.GetEmployeeById:input_type -> user.GetEmployeeByIdRequest
-	27, // 9: user.UserService.GetEmployees:input_type -> user.GetEmployeesRequest
-	31, // 10: user.UserService.UpdateEmployee:input_type -> user.UpdateEmployeeRequest
-	3,  // 11: user.UserService.CreateCompany:input_type -> user.CreateCompanyRequest
-	5,  // 12: user.UserService.GetCompanyById:input_type -> user.GetCompanyByIdRequest
-	7,  // 13: user.UserService.GetCompanies:input_type -> user.GetCompaniesRequest
-	9,  // 14: user.UserService.UpdateCompany:input_type -> user.UpdateCompanyRequest
-	16, // 15: user.UserService.Login:input_type -> user.LoginRequest
-	14, // 16: user.UserService.Logout:input_type -> user.LogoutRequest
-	11, // 17: user.UserService.Refresh:input_type -> user.RefreshRequest
-	0,  // 18: user.UserService.ValidateAccessToken:input_type -> user.ValidateTokenRequest
-	0,  // 19: user.UserService.ValidateRefreshToken:input_type -> user.ValidateTokenRequest
-	18, // 20: user.UserService.RequestPasswordReset:input_type -> user.PasswordActionRequest
-	18, // 21: user.UserService.RequestInitialPasswordSet:input_type -> user.PasswordActionRequest
-	20, // 22: user.UserService.SetPasswordWithToken:input_type -> user.SetPasswordWithTokenRequest
-	25, // 23: user.UserService.CreateClientAccount:input_type -> user.CreateClientRequest
-	23, // 24: user.UserService.CreateEmployeeAccount:input_type -> user.CreateEmployeeRequest
-	30, // 25: user.UserService.GetEmployeeById:output_type -> user.GetEmployeeByIdResponse
-	28, // 26: user.UserService.GetEmployees:output_type -> user.GetEmployeesResponse
-	32, // 27: user.UserService.UpdateEmployee:output_type -> user.UpdateEmployeeResponse
-	4,  // 28: user.UserService.CreateCompany:output_type -> user.CreateCompanyResponse
-	6,  // 29: user.UserService.GetCompanyById:output_type -> user.GetCompanyByIdResponse
-	8,  // 30: user.UserService.GetCompanies:output_type -> user.GetCompaniesResponse
-	10, // 31: user.UserService.UpdateCompany:output_type -> user.UpdateCompanyResponse
-	17, // 32: user.UserService.Login:output_type -> user.LoginResponse
-	15, // 33: user.UserService.Logout:output_type -> user.LogoutResponse
-	12, // 34: user.UserService.Refresh:output_type -> user.RefreshResponse
-	1,  // 35: user.UserService.ValidateAccessToken:output_type -> user.ValidateTokenResponse
-	1,  // 36: user.UserService.ValidateRefreshToken:output_type -> user.ValidateTokenResponse
-	19, // 37: user.UserService.RequestPasswordReset:output_type -> user.PasswordActionResponse
-	19, // 38: user.UserService.RequestInitialPasswordSet:output_type -> user.PasswordActionResponse
-	21, // 39: user.UserService.SetPasswordWithToken:output_type -> user.SetPasswordWithTokenResponse
-	26, // 40: user.UserService.CreateClientAccount:output_type -> user.CreateClientResponse
-	24, // 41: user.UserService.CreateEmployeeAccount:output_type -> user.CreateEmployeeResponse
-	25, // [25:42] is the sub-list for method output_type
-	8,  // [8:25] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	27, // 4: user.GetClientsResponse.Clients:type_name -> user.Client
+	38, // 5: user.GetEmployeesResponse.Employees:type_name -> user.GetEmployeesResponse.Employee
+	22, // 6: user.GetEmployeeByIdResponse.perms:type_name -> user.Permissions
+	22, // 7: user.UpdateEmployeeRequest.perms:type_name -> user.Permissions
+	22, // 8: user.GetEmployeesResponse.Employee.perms:type_name -> user.Permissions
+	34, // 9: user.UserService.GetEmployeeById:input_type -> user.GetEmployeeByIdRequest
+	32, // 10: user.UserService.GetEmployees:input_type -> user.GetEmployeesRequest
+	36, // 11: user.UserService.UpdateEmployee:input_type -> user.UpdateEmployeeRequest
+	3,  // 12: user.UserService.CreateCompany:input_type -> user.CreateCompanyRequest
+	5,  // 13: user.UserService.GetCompanyById:input_type -> user.GetCompanyByIdRequest
+	7,  // 14: user.UserService.GetCompanies:input_type -> user.GetCompaniesRequest
+	9,  // 15: user.UserService.UpdateCompany:input_type -> user.UpdateCompanyRequest
+	16, // 16: user.UserService.Login:input_type -> user.LoginRequest
+	14, // 17: user.UserService.Logout:input_type -> user.LogoutRequest
+	11, // 18: user.UserService.Refresh:input_type -> user.RefreshRequest
+	0,  // 19: user.UserService.ValidateAccessToken:input_type -> user.ValidateTokenRequest
+	0,  // 20: user.UserService.ValidateRefreshToken:input_type -> user.ValidateTokenRequest
+	18, // 21: user.UserService.RequestPasswordReset:input_type -> user.PasswordActionRequest
+	18, // 22: user.UserService.RequestInitialPasswordSet:input_type -> user.PasswordActionRequest
+	20, // 23: user.UserService.SetPasswordWithToken:input_type -> user.SetPasswordWithTokenRequest
+	25, // 24: user.UserService.CreateClientAccount:input_type -> user.CreateClientRequest
+	28, // 25: user.UserService.GetClients:input_type -> user.GetClientsRequest
+	30, // 26: user.UserService.UpdateClient:input_type -> user.UpdateClientRequest
+	23, // 27: user.UserService.CreateEmployeeAccount:input_type -> user.CreateEmployeeRequest
+	35, // 28: user.UserService.GetEmployeeById:output_type -> user.GetEmployeeByIdResponse
+	33, // 29: user.UserService.GetEmployees:output_type -> user.GetEmployeesResponse
+	37, // 30: user.UserService.UpdateEmployee:output_type -> user.UpdateEmployeeResponse
+	4,  // 31: user.UserService.CreateCompany:output_type -> user.CreateCompanyResponse
+	6,  // 32: user.UserService.GetCompanyById:output_type -> user.GetCompanyByIdResponse
+	8,  // 33: user.UserService.GetCompanies:output_type -> user.GetCompaniesResponse
+	10, // 34: user.UserService.UpdateCompany:output_type -> user.UpdateCompanyResponse
+	17, // 35: user.UserService.Login:output_type -> user.LoginResponse
+	15, // 36: user.UserService.Logout:output_type -> user.LogoutResponse
+	12, // 37: user.UserService.Refresh:output_type -> user.RefreshResponse
+	1,  // 38: user.UserService.ValidateAccessToken:output_type -> user.ValidateTokenResponse
+	1,  // 39: user.UserService.ValidateRefreshToken:output_type -> user.ValidateTokenResponse
+	19, // 40: user.UserService.RequestPasswordReset:output_type -> user.PasswordActionResponse
+	19, // 41: user.UserService.RequestInitialPasswordSet:output_type -> user.PasswordActionResponse
+	21, // 42: user.UserService.SetPasswordWithToken:output_type -> user.SetPasswordWithTokenResponse
+	26, // 43: user.UserService.CreateClientAccount:output_type -> user.CreateClientResponse
+	29, // 44: user.UserService.GetClients:output_type -> user.GetClientsResponse
+	31, // 45: user.UserService.UpdateClient:output_type -> user.UpdateClientResponse
+	24, // 46: user.UserService.CreateEmployeeAccount:output_type -> user.CreateEmployeeResponse
+	28, // [28:47] is the sub-list for method output_type
+	9,  // [9:28] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_user_user_proto_init() }
@@ -2415,7 +2810,7 @@ func file_user_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_user_proto_rawDesc), len(file_user_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   34,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

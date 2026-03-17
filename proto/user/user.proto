@@ -21,6 +21,8 @@ service UserService {
   rpc RequestInitialPasswordSet(PasswordActionRequest) returns (PasswordActionResponse);
   rpc SetPasswordWithToken(SetPasswordWithTokenRequest) returns (SetPasswordWithTokenResponse);
   rpc CreateClientAccount(CreateClientRequest) returns (CreateClientResponse);
+  rpc GetClients(GetClientsRequest) returns (GetClientsResponse);
+  rpc UpdateClient(UpdateClientRequest) returns (UpdateClientResponse);
   rpc CreateEmployeeAccount(CreateEmployeeRequest) returns (CreateEmployeeResponse);
 }
 
@@ -174,6 +176,43 @@ message CreateClientRequest {
 
 message CreateClientResponse {
   bool valid = 1;
+}
+
+message Client {
+  int64 Id = 1;
+  string FirstName = 2;
+  string LastName = 3;
+  int64 DateOfBirth = 4;
+  string Gender = 5;
+  string Email = 6;
+  string PhoneNumber = 7;
+  string Address = 8;
+}
+
+message GetClientsRequest {
+  string FirstName = 1;
+  string LastName = 2;
+  string Email = 3;
+}
+
+message GetClientsResponse {
+  repeated Client Clients = 1;
+}
+
+message UpdateClientRequest {
+  int64 Id = 1;
+  string FirstName = 2;
+  string LastName = 3;
+  int64 DateOfBirth = 4;
+  string Gender = 5;
+  string Email = 6;
+  string PhoneNumber = 7;
+  string Address = 8;
+}
+
+message UpdateClientResponse {
+  bool Valid = 1;
+  string Response = 2;
 }
 
 message GetEmployeesRequest {
