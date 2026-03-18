@@ -102,3 +102,12 @@ type updateCompanyRequest struct {
 	Address        string `json:"address" binding:"required"`
 	OwnerID        int64  `json:"owner_id" binding:"required"`
 }
+
+type cardNumberURI struct {
+	CardNumber string `uri:"cardNumber" binding:"required"`
+}
+
+type createCardRequest struct {
+	AccountNumber string `json:"account_number" binding:"required"`
+	CardType      string `json:"card_type" binding:"required"`
+}

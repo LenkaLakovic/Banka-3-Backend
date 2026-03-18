@@ -48,6 +48,13 @@ func SetupApi(router *gin.Engine, server *Server) {
 		companies.GET("/:id", server.GetCompanyByID)
 		companies.PUT("/:id", server.UpdateCompany)
 	}
+
+	cards := api.Group("/cards")
+	{
+		cards.GET("", server.GetCards)
+		cards.POST("", server.CreateCard)
+		cards.PATCH("/:cardNumber/block", server.BlockCard)
+	}
 }
 
 func (s *Server) Healthz(c *gin.Context) {
@@ -523,4 +530,16 @@ func (s *Server) ConfirmPasswordReset(c *gin.Context) {
 	} else {
 		c.Status(http.StatusUnprocessableEntity)
 	}
+}
+
+func (s *Server) GetCards(c *gin.Context) {
+
+}
+
+func (s *Server) CreateCard(c *gin.Context) {
+
+}
+
+func (s *Server) BlockCard(c *gin.Context) {
+
 }
