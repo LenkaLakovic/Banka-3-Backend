@@ -161,6 +161,146 @@ func (s *Server) UpdateEmployee(ctx context.Context, req *userpb.UpdateEmployeeR
 
 }
 
+func mapCompanyToProto(company *Companies) *userpb.Company {
+	if company == nil {
+		return nil
+	}
+
+	return &userpb.Company{
+		Id:             company.Id,
+		RegisteredId:   company.Registered_id,
+		Name:           company.Name,
+		TaxCode:        company.Tax_code,
+		ActivityCodeId: company.Activity_code_id,
+		Address:        company.Address,
+		OwnerId:        company.Owner_id,
+	}
+}
+
+func validateCreateCompanyInput(registeredID int64, name string, taxCode int64, address string, ownerID int64) error {
+	if registeredID <= 0 {
+		return status.Error(codes.InvalidArgument, "registered id must be greater than zero")
+	}
+	if strings.TrimSpace(name) == "" {
+		return status.Error(codes.InvalidArgument, "name is required")
+	}
+	if taxCode <= 0 {
+		return status.Error(codes.InvalidArgument, "tax code must be greater than zero")
+	}
+	if strings.TrimSpace(address) == "" {
+		return status.Error(codes.InvalidArgument, "address is required")
+	}
+	if ownerID <= 0 {
+		return status.Error(codes.InvalidArgument, "owner id must be greater than zero")
+	}
+	return nil
+}
+
+func validateUpdateCompanyInput(id int64, name string, address string, ownerID int64) error {
+	if id <= 0 {
+		return status.Error(codes.InvalidArgument, "id must be greater than zero")
+	}
+	if strings.TrimSpace(name) == "" {
+		return status.Error(codes.InvalidArgument, "name is required")
+	}
+	if strings.TrimSpace(address) == "" {
+		return status.Error(codes.InvalidArgument, "address is required")
+	}
+	if ownerID <= 0 {
+		return status.Error(codes.InvalidArgument, "owner id must be greater than zero")
+	}
+	return nil
+}
+
+func (s *Server) CreateCompany(ctx context.Context, req *userpb.CreateCompanyRequest) (*userpb.CreateCompanyResponse, error) {
+	if err := validateCreateCompanyInput(req.RegisteredId, req.Name, req.TaxCode, req.Address, req.OwnerId); err != nil {
+		return nil, err
+	}
+
+	company, err := s.CreateCompanyRecord(Companies{
+		Registered_id:    req.RegisteredId,
+		Name:             strings.TrimSpace(req.Name),
+		Tax_code:         req.TaxCode,
+		Activity_code_id: req.ActivityCodeId,
+		Address:          strings.TrimSpace(req.Address),
+		Owner_id:         req.OwnerId,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrCompanyRegisteredIDExists):
+			return nil, status.Error(codes.AlreadyExists, "company with that registered id already exists")
+		case errors.Is(err, ErrCompanyOwnerNotFound):
+			return nil, status.Error(codes.InvalidArgument, "owner does not exist")
+		case errors.Is(err, ErrCompanyActivityCodeNotFound):
+			return nil, status.Error(codes.InvalidArgument, "activity code does not exist")
+		default:
+			return nil, status.Error(codes.Internal, "company creation failed")
+		}
+	}
+
+	return &userpb.CreateCompanyResponse{Company: mapCompanyToProto(company)}, nil
+}
+
+func (s *Server) GetCompanyById(ctx context.Context, req *userpb.GetCompanyByIdRequest) (*userpb.GetCompanyByIdResponse, error) {
+	if req.Id <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "id must be greater than zero")
+	}
+
+	company, err := s.GetCompanyByIDRecord(req.Id)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrCompanyNotFound):
+			return nil, status.Error(codes.NotFound, "company not found")
+		default:
+			return nil, status.Error(codes.Internal, "company lookup failed")
+		}
+	}
+
+	return &userpb.GetCompanyByIdResponse{Company: mapCompanyToProto(company)}, nil
+}
+
+func (s *Server) GetCompanies(ctx context.Context, req *userpb.GetCompaniesRequest) (*userpb.GetCompaniesResponse, error) {
+	companies, err := s.GetCompaniesRecords()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "company listing failed")
+	}
+
+	var responseCompanies []*userpb.Company
+	for _, company := range companies {
+		responseCompanies = append(responseCompanies, mapCompanyToProto(company))
+	}
+
+	return &userpb.GetCompaniesResponse{Companies: responseCompanies}, nil
+}
+
+func (s *Server) UpdateCompany(ctx context.Context, req *userpb.UpdateCompanyRequest) (*userpb.UpdateCompanyResponse, error) {
+	if err := validateUpdateCompanyInput(req.Id, req.Name, req.Address, req.OwnerId); err != nil {
+		return nil, err
+	}
+
+	company, err := s.UpdateCompanyRecord(Companies{
+		Id:               req.Id,
+		Name:             strings.TrimSpace(req.Name),
+		Activity_code_id: req.ActivityCodeId,
+		Address:          strings.TrimSpace(req.Address),
+		Owner_id:         req.OwnerId,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrCompanyNotFound):
+			return nil, status.Error(codes.NotFound, "company not found")
+		case errors.Is(err, ErrCompanyOwnerNotFound):
+			return nil, status.Error(codes.InvalidArgument, "owner does not exist")
+		case errors.Is(err, ErrCompanyActivityCodeNotFound):
+			return nil, status.Error(codes.InvalidArgument, "activity code does not exist")
+		default:
+			return nil, status.Error(codes.Internal, "company update failed")
+		}
+	}
+
+	return &userpb.UpdateCompanyResponse{Company: mapCompanyToProto(company)}, nil
+}
+
 func (s *Server) GenerateRefreshToken(email string) (string, error) {
 	now := time.Now()
 	claims := jwt.RegisteredClaims{
@@ -185,9 +325,9 @@ func (s *Server) GenerateAccessToken(email string) (string, error) {
 	return token.SignedString([]byte(s.accessJwtSecret))
 }
 
-func (s *Server) ValidateRefreshToken(ctx context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
-	token, err := jwt.Parse(req.Token, func(t *jwt.Token) (any, error) {
-		return []byte(s.refreshJwtSecret), nil
+func validateJWTToken(tokenString, secret string) (*userpb.ValidateTokenResponse, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
+		return []byte(secret), nil
 	})
 
 	if err != nil {
@@ -212,51 +352,22 @@ func (s *Server) ValidateRefreshToken(ctx context.Context, req *userpb.ValidateT
 		Exp: exp.Unix(),
 		Iat: iat.Unix(),
 	}, nil
+}
+
+func (s *Server) ValidateRefreshToken(ctx context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
+	return validateJWTToken(req.Token, s.refreshJwtSecret)
 }
 
 func (s *Server) ValidateAccessToken(ctx context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
-	token, err := jwt.Parse(req.Token, func(t *jwt.Token) (any, error) {
-		return []byte(s.accessJwtSecret), nil
-	})
-
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, "invalid token")
-	}
-	sub, err := token.Claims.GetSubject()
-	if err != nil {
-		return nil, err
-	}
-	exp, err := token.Claims.GetExpirationTime()
-	if err != nil {
-		return nil, err
-	}
-	iat, err := token.Claims.GetIssuedAt()
-	if err != nil {
-		return nil, err
-	}
-
-	return &userpb.ValidateTokenResponse{
-		Sub: sub,
-		Exp: exp.Unix(),
-		Iat: iat.Unix(),
-	}, nil
+	return validateJWTToken(req.Token, s.accessJwtSecret)
 }
 
 func (s *Server) Refresh(ctx context.Context, req *userpb.RefreshRequest) (*userpb.RefreshResponse, error) {
-	refreshToken := req.RefreshToken
-	parsed, err := jwt.Parse(refreshToken, func(t *jwt.Token) (any, error) {
-		return []byte(s.refreshJwtSecret), nil
-	})
+	token, err := validateJWTToken(req.RefreshToken, s.refreshJwtSecret)
 	if err != nil {
-		return nil, fmt.Errorf("parsing token: %w", err)
+		return nil, err
 	}
-	if !parsed.Valid {
-		return nil, fmt.Errorf("invalid refresh token: %w", err)
-	}
-	email, err := parsed.Claims.GetSubject()
-	if err != nil {
-		return nil, fmt.Errorf("getting subject: %w", err)
-	}
+	email := token.Sub
 
 	newSignedToken, err := s.GenerateRefreshToken(email)
 	if err != nil {
@@ -283,7 +394,7 @@ func (s *Server) Refresh(ctx context.Context, req *userpb.RefreshRequest) (*user
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	err = s.rotateRefreshToken(tx, email, hashValue(refreshToken), hashValue(newSignedToken), newExpiry.Time)
+	err = s.rotateRefreshToken(tx, email, hashValue(req.RefreshToken), hashValue(newSignedToken), newExpiry.Time)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "wrong token")
 	}
