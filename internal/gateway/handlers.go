@@ -272,13 +272,105 @@ func (s *Server) ConfirmPasswordReset(c *gin.Context) {
 }
 
 func (s *Server) GetLoans(c *gin.Context) {
+	var query getLoansQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		writeBindError(c, err)
+		return
+	}
 
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := s.UserClient.GetLoans(ctx, &userpb.GetLoansRequest{
+		LoanType:      query.LoanType,
+		AccountNumber: query.AccountNumber,
+		Status:        query.Status,
+	})
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	loans := make([]gin.H, 0, len(resp.Loans))
+	for _, loan := range resp.Loans {
+		loans = append(loans, gin.H{
+			"loan_number":             loan.LoanNumber,
+			"loan_type":               loan.LoanType,
+			"account_number":          loan.AccountNumber,
+			"loan_amount":             loan.LoanAmount,
+			"repayment_period":        loan.RepaymentPeriod,
+			"nominal_rate":            loan.NominalRate,
+			"effective_rate":          loan.EffectiveRate,
+			"agreement_date":          loan.AgreementDate,
+			"maturity_date":           loan.MaturityDate,
+			"next_installment_amount": loan.NextInstallmentAmount,
+			"next_installment_date":   loan.NextInstallmentDate,
+			"remaining_debt":          loan.RemainingDebt,
+			"currency":                loan.Currency,
+			"status":                  loan.Status,
+		})
+	}
+
+	c.JSON(http.StatusOK, loans)
 }
 
 func (s *Server) GetLoanByNumber(c *gin.Context) {
+	var uri getLoanByNumberURI
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.String(http.StatusBadRequest, "loan number is required")
+		return
+	}
 
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := s.UserClient.GetLoanByNumber(ctx, &userpb.GetLoanByNumberRequest{
+		LoanNumber: uri.LoanNumber,
+	})
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"loan_number":             resp.LoanNumber,
+		"loan_type":               resp.LoanType,
+		"account_number":          resp.AccountNumber,
+		"loan_amount":             resp.LoanAmount,
+		"repayment_period":        resp.RepaymentPeriod,
+		"nominal_rate":            resp.NominalRate,
+		"effective_rate":          resp.EffectiveRate,
+		"agreement_date":          resp.AgreementDate,
+		"maturity_date":           resp.MaturityDate,
+		"next_installment_amount": resp.NextInstallmentAmount,
+		"next_installment_date":   resp.NextInstallmentDate,
+		"remaining_debt":          resp.RemainingDebt,
+		"currency":                resp.Currency,
+		"status":                  resp.Status,
+	})
 }
 
 func (s *Server) CreateLoanRequest(c *gin.Context) {
+	var req createLoanRequestRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		writeBindError(c, err)
+		return
+	}
 
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	_, err := s.UserClient.CreateLoanRequest(ctx, &userpb.CreateLoanRequestRequest{
+		AccountNumber:   req.AccountNumber,
+		LoanType:        req.LoanType,
+		Amount:          req.Amount,
+		RepaymentPeriod: req.RepaymentPeriod,
+		Currency:        req.Currency,
+	})
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	c.Status(http.StatusCreated)
 }
