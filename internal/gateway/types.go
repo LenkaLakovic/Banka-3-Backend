@@ -22,6 +22,28 @@ type passwordResetConfirmationRequest struct {
 	NewPassword string `json:"password" binding:"required"`
 }
 
+type getEmployeesQuery struct {
+	Email     string `form:"email"`
+	FirstName string `form:"first_name"`
+	LastName  string `form:"last_name"`
+	Position  string `form:"position"`
+}
+
+type updateEmployeeURI struct {
+	EmployeeID int64 `uri:"id" binding:"required"`
+}
+
+type updateEmployeeRequest struct {
+	LastName    *string   `json:"last_name"`
+	Gender      *string   `json:"gender"`
+	PhoneNumber *string   `json:"phone_number"`
+	Address     *string   `json:"address"`
+	Position    *string   `json:"position"`
+	Department  *string   `json:"department"`
+	Active      *bool     `json:"active"`
+	Permissions *[]string `json:"permissions"`
+}
+
 type createClientAccountRequest struct {
 	FirstName   string `json:"first_name" binding:"required"`
 	LastName    string `json:"last_name" binding:"required"`
