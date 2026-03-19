@@ -108,7 +108,7 @@ func (s *Server) GetEmployeeById(ctx context.Context, req *userpb.GetEmployeeByI
 }
 
 func (s *Server) GetEmployees(ctx context.Context, req *userpb.GetEmployeesRequest) (*userpb.GetEmployeesResponse, error) {
-	map_func := func(emp Get_employees) *userpb.GetEmployeesResponse_Employee {
+	map_func := func(emp Employee) *userpb.GetEmployeesResponse_Employee {
 		return &userpb.GetEmployeesResponse_Employee{
 			Id:          int64(emp.Id),
 			FirstName:   emp.First_name,
@@ -119,13 +119,13 @@ func (s *Server) GetEmployees(ctx context.Context, req *userpb.GetEmployeesReque
 			Active:      emp.Active,
 		}
 	}
-	employees, err := s.GetAllEmployees(req.Email, req.FirstName, req.LastName, req.Position)
+	employees, err := s.GetAllEmployees(&req.Email, &req.FirstName, &req.LastName, &req.Position)
 	if err != nil {
 		log.Printf("Error in retrieving employees: %s", err.Error())
 		return nil, status.Error(codes.Internal, "Failed to retrieve employees")
 	}
 	var employee_responses []*userpb.GetEmployeesResponse_Employee
-	for _, emp := range *employees {
+	for _, emp := range employees {
 		employee_responses = append(employee_responses, map_func(emp))
 	}
 
