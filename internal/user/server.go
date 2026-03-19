@@ -771,6 +771,23 @@ func (s *Server) CreateEmployeeAccount(ctx context.Context, req *userpb.CreateEm
 
 }
 
+func parseLoanType(value string) (loan_type, error) {
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case "GOTOVINSKI":
+		return Cash, nil
+	case "STAMBENI":
+		return Mortgage, nil
+	case "AUTO":
+		return Car, nil
+	case "REFINANSIRAJUCI":
+		return Refinancing, nil
+	case "STUDENTSKI":
+		return Student, nil
+	default:
+		return "", status.Error(codes.InvalidArgument, "invalid loan_type")
+	}
+}
+
 func (s *Server) GetLoans(ctx context.Context, req *userpb.GetLoansRequest) (*userpb.GetLoansResponse, error) {
 	clientEmail := strings.TrimSpace(req.ClientEmail)
 	if clientEmail == "" {
@@ -779,20 +796,11 @@ func (s *Server) GetLoans(ctx context.Context, req *userpb.GetLoansRequest) (*us
 
 	loanType := ""
 	if strings.TrimSpace(req.LoanType) != "" {
-		switch strings.ToUpper(strings.TrimSpace(req.LoanType)) {
-		case "GOTOVINSKI":
-			loanType = string(Cash)
-		case "STAMBENI":
-			loanType = string(Mortgage)
-		case "AUTO":
-			loanType = string(Car)
-		case "REFINANSIRAJUCI":
-			loanType = string(Refinancing)
-		case "STUDENTSKI":
-			loanType = string(Student)
-		default:
-			return nil, status.Error(codes.InvalidArgument, "invalid loan_type")
+		parsedLoanType, err := parseLoanType(req.LoanType)
+		if err != nil {
+			return nil, err
 		}
+		loanType = string(parsedLoanType)
 	}
 
 	loanStatus := ""
@@ -910,20 +918,9 @@ func (s *Server) CreateLoanRequest(ctx context.Context, req *userpb.CreateLoanRe
 		return nil, status.Error(codes.InvalidArgument, "repayment_period must be positive")
 	}
 
-	var normalizedType loan_type
-	switch strings.ToUpper(strings.TrimSpace(req.LoanType)) {
-	case "GOTOVINSKI":
-		normalizedType = Cash
-	case "STAMBENI":
-		normalizedType = Mortgage
-	case "AUTO":
-		normalizedType = Car
-	case "REFINANSIRAJUCI":
-		normalizedType = Refinancing
-	case "STUDENTSKI":
-		normalizedType = Student
-	default:
-		return nil, status.Error(codes.InvalidArgument, "invalid loan_type")
+	normalizedType, err := parseLoanType(req.LoanType)
+	if err != nil {
+		return nil, err
 	}
 
 	account, err := s.getOwnedAccountByNumber(clientEmail, accountNumber)
