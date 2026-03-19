@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	userpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/user"
 )
 
@@ -260,7 +261,7 @@ func (s *Server) CreateEmployeeAccount(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-func companyResponse(company *userpb.Company) gin.H {
+func companyResponse(company *bankpb.Company) gin.H {
 	return gin.H{
 		"id":               company.Id,
 		"registered_id":    company.RegisteredId,
@@ -282,7 +283,7 @@ func (s *Server) CreateCompany(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.UserClient.CreateCompany(ctx, &userpb.CreateCompanyRequest{
+	resp, err := s.BankClient.CreateCompany(ctx, &bankpb.CreateCompanyRequest{
 		RegisteredId:   req.RegisteredID,
 		Name:           req.Name,
 		TaxCode:        req.TaxCode,
@@ -308,7 +309,7 @@ func (s *Server) GetCompanyByID(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.UserClient.GetCompanyById(ctx, &userpb.GetCompanyByIdRequest{
+	resp, err := s.BankClient.GetCompanyById(ctx, &bankpb.GetCompanyByIdRequest{
 		Id: uri.CompanyID,
 	})
 	if err != nil {
@@ -323,7 +324,7 @@ func (s *Server) GetCompanies(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.UserClient.GetCompanies(ctx, &userpb.GetCompaniesRequest{})
+	resp, err := s.BankClient.GetCompanies(ctx, &bankpb.GetCompaniesRequest{})
 	if err != nil {
 		writeGRPCError(c, err)
 		return
@@ -355,7 +356,7 @@ func (s *Server) UpdateCompany(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.UserClient.UpdateCompany(ctx, &userpb.UpdateCompanyRequest{
+	resp, err := s.BankClient.UpdateCompany(ctx, &bankpb.UpdateCompanyRequest{
 		Id:             uri.CompanyID,
 		Name:           req.Name,
 		ActivityCodeId: req.ActivityCodeID,

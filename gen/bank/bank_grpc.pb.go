@@ -7,7 +7,10 @@
 package bank
 
 import (
+	context "context"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -15,10 +18,21 @@ import (
 // Requires gRPC-Go v1.64.0 or later.
 const _ = grpc.SupportPackageIsVersion9
 
+const (
+	BankService_CreateCompany_FullMethodName  = "/bank.BankService/CreateCompany"
+	BankService_GetCompanyById_FullMethodName = "/bank.BankService/GetCompanyById"
+	BankService_GetCompanies_FullMethodName   = "/bank.BankService/GetCompanies"
+	BankService_UpdateCompany_FullMethodName  = "/bank.BankService/UpdateCompany"
+)
+
 // BankServiceClient is the client API for BankService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BankServiceClient interface {
+	CreateCompany(ctx context.Context, in *CreateCompanyRequest, opts ...grpc.CallOption) (*CreateCompanyResponse, error)
+	GetCompanyById(ctx context.Context, in *GetCompanyByIdRequest, opts ...grpc.CallOption) (*GetCompanyByIdResponse, error)
+	GetCompanies(ctx context.Context, in *GetCompaniesRequest, opts ...grpc.CallOption) (*GetCompaniesResponse, error)
+	UpdateCompany(ctx context.Context, in *UpdateCompanyRequest, opts ...grpc.CallOption) (*UpdateCompanyResponse, error)
 }
 
 type bankServiceClient struct {
@@ -29,10 +43,54 @@ func NewBankServiceClient(cc grpc.ClientConnInterface) BankServiceClient {
 	return &bankServiceClient{cc}
 }
 
+func (c *bankServiceClient) CreateCompany(ctx context.Context, in *CreateCompanyRequest, opts ...grpc.CallOption) (*CreateCompanyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateCompanyResponse)
+	err := c.cc.Invoke(ctx, BankService_CreateCompany_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) GetCompanyById(ctx context.Context, in *GetCompanyByIdRequest, opts ...grpc.CallOption) (*GetCompanyByIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCompanyByIdResponse)
+	err := c.cc.Invoke(ctx, BankService_GetCompanyById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) GetCompanies(ctx context.Context, in *GetCompaniesRequest, opts ...grpc.CallOption) (*GetCompaniesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCompaniesResponse)
+	err := c.cc.Invoke(ctx, BankService_GetCompanies_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) UpdateCompany(ctx context.Context, in *UpdateCompanyRequest, opts ...grpc.CallOption) (*UpdateCompanyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCompanyResponse)
+	err := c.cc.Invoke(ctx, BankService_UpdateCompany_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BankServiceServer is the server API for BankService service.
 // All implementations must embed UnimplementedBankServiceServer
 // for forward compatibility.
 type BankServiceServer interface {
+	CreateCompany(context.Context, *CreateCompanyRequest) (*CreateCompanyResponse, error)
+	GetCompanyById(context.Context, *GetCompanyByIdRequest) (*GetCompanyByIdResponse, error)
+	GetCompanies(context.Context, *GetCompaniesRequest) (*GetCompaniesResponse, error)
+	UpdateCompany(context.Context, *UpdateCompanyRequest) (*UpdateCompanyResponse, error)
 	mustEmbedUnimplementedBankServiceServer()
 }
 
@@ -43,6 +101,18 @@ type BankServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBankServiceServer struct{}
 
+func (UnimplementedBankServiceServer) CreateCompany(context.Context, *CreateCompanyRequest) (*CreateCompanyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateCompany not implemented")
+}
+func (UnimplementedBankServiceServer) GetCompanyById(context.Context, *GetCompanyByIdRequest) (*GetCompanyByIdResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCompanyById not implemented")
+}
+func (UnimplementedBankServiceServer) GetCompanies(context.Context, *GetCompaniesRequest) (*GetCompaniesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCompanies not implemented")
+}
+func (UnimplementedBankServiceServer) UpdateCompany(context.Context, *UpdateCompanyRequest) (*UpdateCompanyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCompany not implemented")
+}
 func (UnimplementedBankServiceServer) mustEmbedUnimplementedBankServiceServer() {}
 func (UnimplementedBankServiceServer) testEmbeddedByValue()                     {}
 
@@ -64,13 +134,102 @@ func RegisterBankServiceServer(s grpc.ServiceRegistrar, srv BankServiceServer) {
 	s.RegisterService(&BankService_ServiceDesc, srv)
 }
 
+func _BankService_CreateCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCompanyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).CreateCompany(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_CreateCompany_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).CreateCompany(ctx, req.(*CreateCompanyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_GetCompanyById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCompanyByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetCompanyById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetCompanyById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetCompanyById(ctx, req.(*GetCompanyByIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_GetCompanies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCompaniesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetCompanies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetCompanies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetCompanies(ctx, req.(*GetCompaniesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_UpdateCompany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCompanyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).UpdateCompany(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_UpdateCompany_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).UpdateCompany(ctx, req.(*UpdateCompanyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BankService_ServiceDesc is the grpc.ServiceDesc for BankService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BankService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "bank.BankService",
 	HandlerType: (*BankServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams:     []grpc.StreamDesc{},
-	Metadata:    "bank/bank.proto",
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateCompany",
+			Handler:    _BankService_CreateCompany_Handler,
+		},
+		{
+			MethodName: "GetCompanyById",
+			Handler:    _BankService_GetCompanyById_Handler,
+		},
+		{
+			MethodName: "GetCompanies",
+			Handler:    _BankService_GetCompanies_Handler,
+		},
+		{
+			MethodName: "UpdateCompany",
+			Handler:    _BankService_UpdateCompany_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "bank/bank.proto",
 }

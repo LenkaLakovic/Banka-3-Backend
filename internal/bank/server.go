@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -9,8 +10,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
-
-	userpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/user"
 )
 
 const (
@@ -30,12 +29,12 @@ func NewServer(database *sql.DB, gorm_db *gorm.DB) *Server {
 	}
 }
 
-func mapCompanyToProto(company *Company) *userpb.Company {
+func mapCompanyToProto(company *Company) *bankpb.Company {
 	if company == nil {
 		return nil
 	}
 
-	return &userpb.Company{
+	return &bankpb.Company{
 		Id:             company.Id,
 		RegisteredId:   company.Registered_id,
 		Name:           company.Name,
@@ -81,7 +80,7 @@ func validateUpdateCompanyInput(id int64, name string, address string, ownerID i
 	return nil
 }
 
-func (s *Server) CreateCompany(req *userpb.CreateCompanyRequest) (*userpb.CreateCompanyResponse, error) {
+func (s *Server) CreateCompany(ctx context.Context, req *bankpb.CreateCompanyRequest) (*bankpb.CreateCompanyResponse, error) {
 	if err := validateCreateCompanyInput(req.RegisteredId, req.Name, req.TaxCode, req.Address, req.OwnerId); err != nil {
 		return nil, err
 	}
@@ -107,10 +106,10 @@ func (s *Server) CreateCompany(req *userpb.CreateCompanyRequest) (*userpb.Create
 		}
 	}
 
-	return &userpb.CreateCompanyResponse{Company: mapCompanyToProto(company)}, nil
+	return &bankpb.CreateCompanyResponse{Company: mapCompanyToProto(company)}, nil
 }
 
-func (s *Server) GetCompanyById(req *userpb.GetCompanyByIdRequest) (*userpb.GetCompanyByIdResponse, error) {
+func (s *Server) GetCompanyById(ctx context.Context, req *bankpb.GetCompanyByIdRequest) (*bankpb.GetCompanyByIdResponse, error) {
 	if req.Id <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "id must be greater than zero")
 	}
@@ -125,24 +124,24 @@ func (s *Server) GetCompanyById(req *userpb.GetCompanyByIdRequest) (*userpb.GetC
 		}
 	}
 
-	return &userpb.GetCompanyByIdResponse{Company: mapCompanyToProto(company)}, nil
+	return &bankpb.GetCompanyByIdResponse{Company: mapCompanyToProto(company)}, nil
 }
 
-func (s *Server) GetCompanies() (*userpb.GetCompaniesResponse, error) {
+func (s *Server) GetCompanies(ctx context.Context, req *bankpb.GetCompaniesRequest) (*bankpb.GetCompaniesResponse, error) {
 	companies, err := s.GetCompaniesRecords()
 	if err != nil {
 		return nil, status.Error(codes.Internal, "company listing failed")
 	}
 
-	var responseCompanies []*userpb.Company
+	var responseCompanies []*bankpb.Company
 	for _, company := range companies {
 		responseCompanies = append(responseCompanies, mapCompanyToProto(company))
 	}
 
-	return &userpb.GetCompaniesResponse{Companies: responseCompanies}, nil
+	return &bankpb.GetCompaniesResponse{Companies: responseCompanies}, nil
 }
 
-func (s *Server) UpdateCompany(req *userpb.UpdateCompanyRequest) (*userpb.UpdateCompanyResponse, error) {
+func (s *Server) UpdateCompany(ctx context.Context, req *bankpb.UpdateCompanyRequest) (*bankpb.UpdateCompanyResponse, error) {
 	if err := validateUpdateCompanyInput(req.Id, req.Name, req.Address, req.OwnerId); err != nil {
 		return nil, err
 	}
@@ -167,5 +166,5 @@ func (s *Server) UpdateCompany(req *userpb.UpdateCompanyRequest) (*userpb.Update
 		}
 	}
 
-	return &userpb.UpdateCompanyResponse{Company: mapCompanyToProto(company)}, nil
+	return &bankpb.UpdateCompanyResponse{Company: mapCompanyToProto(company)}, nil
 }

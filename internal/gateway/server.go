@@ -6,12 +6,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	notificationpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/notification"
 	userpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/user"
 )
 
 type Server struct {
 	UserClient         userpb.UserServiceClient
+	BankClient         bankpb.BankServiceClient
 	NotificationClient notificationpb.NotificationServiceClient
 }
 
