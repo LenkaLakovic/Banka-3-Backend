@@ -8,12 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type User struct {
-	email          string
-	hashedPassword []byte
-	salt           []byte
-}
-
 var ErrCompanyNotFound = errors.New("company not found")
 var ErrCompanyRegisteredIDExists = errors.New("company with registered id already exists")
 var ErrCompanyOwnerNotFound = errors.New("company owner not found")
