@@ -43,6 +43,16 @@ CREATE TABLE IF NOT EXISTS clients (
     updated_at    TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS payment_recipiants (
+    id              BIGSERIAL    PRIMARY KEY,
+    client_id       BIGINT       NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    name            VARCHAR(127) NOT NULL,
+    account_number  VARCHAR(20)  NOT NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+    UNIQUE (client_id, account_number)
+);
+
 CREATE TABLE IF NOT EXISTS refresh_tokens (
     email        VARCHAR(255) PRIMARY KEY,
     hashed_token BYTEA        NOT NULL,
@@ -152,6 +162,7 @@ CREATE TABLE IF NOT EXISTS payments (
     start_amount        BIGINT          NOT NULL,
     end_amount          BIGINT          NOT NULL,
     commission          BIGINT          NOT NULL,
+    status              VARCHAR(20)     NOT NULL DEFAULT 'realized' CHECK (status IN ('realized', 'rejected', 'pending')),
     recipient_id        BIGINT          REFERENCES clients(id),
     transcaction_code    INT            NOT NULL,
     call_number         VARCHAR(31)     NOT NULL,
@@ -168,6 +179,7 @@ CREATE TABLE IF NOT EXISTS transfers (
     start_currency_id   BIGINT          REFERENCES currencies(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     exchange_rate       DECIMAL(20,2),
     commission          BIGINT          NOT NULL,
+    status              VARCHAR(20)     NOT NULL DEFAULT 'realized' CHECK (status IN ('realized', 'rejected', 'pending')),
     timestamp           TIMESTAMP       NOT NULL DEFAULT NOW()
 );
 

@@ -103,3 +103,36 @@ type updateCompanyRequest struct {
 	Address        string `json:"address" binding:"required"`
 	OwnerID        int64  `json:"owner_id" binding:"required"`
 }
+type createPaymentRecipientRequest struct {
+	Name          string `json:"name" binding:"required"`
+	AccountNumber string `json:"account_number" binding:"required"`
+}
+type updatePaymentRecipientRequest struct {
+	Name          string `json:"name" binding:"required"`
+	AccountNumber string `json:"account_number" binding:"required"`
+}
+
+type paymentRecipientByIDURI struct {
+	ID int64 `uri:"id" binding:"required"`
+}
+
+type getTransactionsQuery struct {
+	DateFrom   string  `form:"date_from"`
+	DateTo     string  `form:"date_to"`
+	AmountFrom float64 `form:"amount_from"`
+	AmountTo   float64 `form:"amount_to"`
+	Status     string  `form:"status"`
+
+	Page     int32 `form:"page"`
+	PageSize int32 `form:"page_size"`
+
+	SortBy    string `form:"sort_by"`
+	SortOrder string `form:"sort_order"`
+}
+type transactionByIDURI struct {
+	ID int64 `uri:"id" binding:"required"`
+}
+
+type transactionTypeQuery struct {
+	Type string `form:"type" binding:"required"`
+}
