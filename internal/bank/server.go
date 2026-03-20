@@ -4,16 +4,19 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
+	"time"
 
 	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
 const (
-// defaultNotificationURL = "notification:50051"
+	defaultNotificationURL = "notification:50051"
 )
 
 type Server struct {
@@ -80,7 +83,7 @@ func validateUpdateCompanyInput(id int64, name string, address string, ownerID i
 	return nil
 }
 
-func (s *Server) CreateCompany(ctx context.Context, req *bankpb.CreateCompanyRequest) (*bankpb.CreateCompanyResponse, error) {
+func (s *Server) CreateCompany(_ context.Context, req *bankpb.CreateCompanyRequest) (*bankpb.CreateCompanyResponse, error) {
 	if err := validateCreateCompanyInput(req.RegisteredId, req.Name, req.TaxCode, req.Address, req.OwnerId); err != nil {
 		return nil, err
 	}
@@ -109,7 +112,7 @@ func (s *Server) CreateCompany(ctx context.Context, req *bankpb.CreateCompanyReq
 	return &bankpb.CreateCompanyResponse{Company: mapCompanyToProto(company)}, nil
 }
 
-func (s *Server) GetCompanyById(ctx context.Context, req *bankpb.GetCompanyByIdRequest) (*bankpb.GetCompanyByIdResponse, error) {
+func (s *Server) GetCompanyById(_ context.Context, req *bankpb.GetCompanyByIdRequest) (*bankpb.GetCompanyByIdResponse, error) {
 	if req.Id <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "id must be greater than zero")
 	}
@@ -127,7 +130,7 @@ func (s *Server) GetCompanyById(ctx context.Context, req *bankpb.GetCompanyByIdR
 	return &bankpb.GetCompanyByIdResponse{Company: mapCompanyToProto(company)}, nil
 }
 
-func (s *Server) GetCompanies(ctx context.Context, req *bankpb.GetCompaniesRequest) (*bankpb.GetCompaniesResponse, error) {
+func (s *Server) GetCompanies(_ context.Context, _ *bankpb.GetCompaniesRequest) (*bankpb.GetCompaniesResponse, error) {
 	companies, err := s.GetCompaniesRecords()
 	if err != nil {
 		return nil, status.Error(codes.Internal, "company listing failed")
@@ -141,7 +144,7 @@ func (s *Server) GetCompanies(ctx context.Context, req *bankpb.GetCompaniesReque
 	return &bankpb.GetCompaniesResponse{Companies: responseCompanies}, nil
 }
 
-func (s *Server) UpdateCompany(ctx context.Context, req *bankpb.UpdateCompanyRequest) (*bankpb.UpdateCompanyResponse, error) {
+func (s *Server) UpdateCompany(_ context.Context, req *bankpb.UpdateCompanyRequest) (*bankpb.UpdateCompanyResponse, error) {
 	if err := validateUpdateCompanyInput(req.Id, req.Name, req.Address, req.OwnerId); err != nil {
 		return nil, err
 	}
@@ -167,4 +170,152 @@ func (s *Server) UpdateCompany(ctx context.Context, req *bankpb.UpdateCompanyReq
 	}
 
 	return &bankpb.UpdateCompanyResponse{Company: mapCompanyToProto(company)}, nil
+}
+
+func mapCardToProto(card *Card) *bankpb.CardResponse {
+	if card == nil {
+		return nil
+	}
+	return &bankpb.CardResponse{
+		CardId:         fmt.Sprintf("%d", card.Id),
+		CardNumber:     card.Number,
+		CardType:       string(card.Type),
+		CardBrand:      string(card.Brand),
+		CreationDate:   card.Creation_date.Format(time.RFC3339),
+		ExpirationDate: card.Valid_until.Format(time.RFC3339),
+		AccountNumber:  card.Account_number,
+		Cvv:            card.Cvv,
+		Limit:          card.Card_limit,
+		Status:         string(card.Status),
+	}
+}
+
+func (s *Server) CreateCard(_ context.Context, req *bankpb.CreateCardRequest) (*bankpb.CardResponse, error) {
+	brand := card_brand(strings.ToLower(req.CardBrand))
+	number, err := GenerateCardNumber(brand, req.AccountNumber)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	card, err := s.CreateCardRecord(Card{
+		Number:         number,
+		Type:           card_type(strings.ToLower(req.CardType)),
+		Brand:          brand,
+		Valid_until:    time.Now().AddDate(5, 0, 0),
+		Account_number: req.AccountNumber,
+		Cvv:            GenerateCVV(),
+		Status:         Active,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to create card")
+	}
+
+	return mapCardToProto(card), nil
+}
+
+func (s *Server) RequestCard(ctx context.Context, req *bankpb.RequestCardRequest) (*bankpb.RequestCardResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "metadata missing")
+	}
+	emails := md.Get("user-email")
+	if len(emails) == 0 {
+		return nil, status.Error(codes.Unauthenticated, "email missing in metadata")
+	}
+	userEmail := emails[0]
+
+	acc, err := s.GetAccountByNumberRecord(req.AccountNumber)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "account not found")
+	}
+
+	isAuth, _ := s.IsAuthorizedParty(userEmail, req.AccountNumber)
+	limit := 2
+	if isAuth {
+		limit = 1
+	}
+
+	count, err := s.CountActiveCardsByAccountNumber(req.AccountNumber)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to check limits")
+	}
+
+	if count >= limit {
+		return nil, status.Error(codes.FailedPrecondition, "card limit reached for this user type")
+	}
+
+	token := fmt.Sprintf("tkn-%d-%d", time.Now().UnixNano(), acc.Id)
+	_, err = s.CreateCardRequestRecord(CardRequest{
+		Account_number: req.AccountNumber,
+		Type:           card_type(strings.ToLower(req.CardType)),
+		Brand:          card_brand(strings.ToLower(req.CardBrand)),
+		Token:          token,
+		ExpirationDate: time.Now().Add(24 * time.Hour),
+		Complete:       false,
+		Email:          userEmail,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to create request")
+	}
+
+	err = s.sendCardConfirmationEmail(ctx, req.AccountNumber, userEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bankpb.RequestCardResponse{Accepted: true}, nil
+}
+
+func (s *Server) ConfirmCard(ctx context.Context, req *bankpb.ConfirmCardRequest) (*bankpb.ConfirmCardResponse, error) {
+	request, err := s.GetCardRequestByToken(req.Token)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "invalid or expired token")
+	}
+
+	if time.Now().After(request.ExpirationDate) {
+		return nil, status.Error(codes.DeadlineExceeded, "token expired")
+	}
+
+	cardNumber, _ := GenerateCardNumber(request.Brand, request.Account_number)
+	_, err = s.CreateCardRecord(Card{
+		Number:         cardNumber,
+		Type:           request.Type,
+		Brand:          request.Brand,
+		Valid_until:    time.Now().AddDate(5, 0, 0),
+		Account_number: request.Account_number,
+		Cvv:            GenerateCVV(),
+		Status:         Active,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to create card from request")
+	}
+
+	err = s.MarkCardRequestFulfilled(request.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to close request")
+	}
+
+	err = s.sendCardCreatedEmail(ctx, request.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	return &bankpb.ConfirmCardResponse{}, nil
+}
+
+func (s *Server) GetCards(_ context.Context, _ *bankpb.GetCardsRequest) (*bankpb.GetCardsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "not implemented yet")
+}
+
+func (s *Server) BlockCard(_ context.Context, req *bankpb.BlockCardRequest) (*bankpb.BlockCardResponse, error) {
+	if req.CardId <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "invalid card id")
+	}
+
+	err := s.BlockCardRecord(req.CardId)
+	if err != nil {
+		return &bankpb.BlockCardResponse{Success: false}, status.Error(codes.NotFound, "card not found")
+	}
+
+	return &bankpb.BlockCardResponse{Success: true}, nil
 }

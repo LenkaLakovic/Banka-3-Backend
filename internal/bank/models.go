@@ -15,6 +15,7 @@ type (
 	interest_rate_type string
 	installment_status string
 	employment_status  string
+	card_brand         string
 
 	// Note, unlike type aliease these are all destinct types, only
 	// their underlying type is string.
@@ -69,6 +70,11 @@ const (
 	Full_time  employment_status = "full_time"
 	Temporary  employment_status = "temporary"
 	Unemployed employment_status = "unemployed"
+
+	visa       card_brand = "visa"
+	mastercard card_brand = "mastercard"
+	amex       card_brand = "amex"
+	dinacard   card_brand = "dinacard"
 )
 
 type (
@@ -123,13 +129,24 @@ type (
 		Id             int64       `gorm:"column:id;type:bigserial;not null;primaryKey"`
 		Number         string      `gorm:"column:number;type:varchar(20);not null;unique"`
 		Type           card_type   `gorm:"column:type;type:card_type;not null;default:'debit'"`
-		Name           string      `gorm:"column:name;type:varchar(127);not null"`
+		Brand          card_brand  `gorm:"column:brand;type:card_brand;not null"`
 		Creation_date  time.Time   `gorm:"column:creation_date;not null;autoCreateTime"`
 		Valid_until    time.Time   `gorm:"column:created_at;not null;autoCreateTime"`
 		Account_number string      `gorm:"column:account_number;type:varchar(20);references accounts(number)"`
 		Cvv            string      `gorm:"column:cvv;type:varchar(7);not null"`
 		Card_limit     int64       `gorm:"column:card_limit;type:bigint"`
 		Status         card_status `gorm:"column:status;type:card_status;not null;default 'active'"`
+	}
+
+	CardRequest struct {
+		Id             int64      `gorm:"column:id;type:bigserial;not null;primaryKey"`
+		Account_number string     `gorm:"column:account_number;type:varchar(20);references accounts(number)"`
+		Type           card_type  `gorm:"column:type;type:card_type;not null;default:'debit'"`
+		Brand          card_brand `gorm:"column:brand;type:card_brand;not null"`
+		Token          string     `gorm:"column:token;type:varchar(255);not null"`
+		ExpirationDate time.Time  `gorm:"column:expiration_date;not null"`
+		Complete       bool       `gorm:"column:complete;type:boolean;not null;default false"`
+		Email          string     `gorm:"column:email;type:varchar(255);not null"`
 	}
 
 	AuthorizedParty struct {
@@ -273,4 +290,8 @@ func (LoanRequest) TableName() string {
 
 func (VerificationCode) TableName() string {
 	return "loan_request"
+}
+
+func (CardRequest) TableName() string {
+	return "card_requests"
 }
