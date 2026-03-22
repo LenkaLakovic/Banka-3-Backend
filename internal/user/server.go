@@ -107,7 +107,7 @@ func (s *Server) GetEmployeeById(_ context.Context, req *userpb.GetEmployeeByIdR
 	return resp.toProtobuf(), nil
 }
 
-func (s *Server) DeleteEmployee(ctx context.Context, req *userpb.DeleteEmployeeRequest) (*userpb.DeleteEmployeeResponse, error) {
+func (s *Server) DeleteEmployee(_ context.Context, req *userpb.DeleteEmployeeRequest) (*userpb.DeleteEmployeeResponse, error) {
 	err := s.deleteEmployee(req.Id)
 	if err != nil {
 		if errors.Is(err, ErrEmployeeNotFound) {
@@ -118,7 +118,7 @@ func (s *Server) DeleteEmployee(ctx context.Context, req *userpb.DeleteEmployeeR
 	return &userpb.DeleteEmployeeResponse{Success: true}, nil
 }
 
-func (s *Server) GetEmployees(ctx context.Context, req *userpb.GetEmployeesRequest) (*userpb.GetEmployeesResponse, error) {
+func (s *Server) GetEmployees(_ context.Context, req *userpb.GetEmployeesRequest) (*userpb.GetEmployeesResponse, error) {
 	map_func := func(emp Employee) *userpb.GetEmployeesResponse_Employee {
 		return &userpb.GetEmployeesResponse_Employee{
 			Id:          int64(emp.Id),
@@ -143,7 +143,7 @@ func (s *Server) GetEmployees(ctx context.Context, req *userpb.GetEmployeesReque
 	return &userpb.GetEmployeesResponse{Employees: employee_responses}, nil
 }
 
-func (s *Server) UpdateEmployee(ctx context.Context, req *userpb.UpdateEmployeeRequest) (*userpb.GetEmployeeResponse, error) {
+func (s *Server) UpdateEmployee(_ context.Context, req *userpb.UpdateEmployeeRequest) (*userpb.GetEmployeeResponse, error) {
 	println("here")
 
 	var permissions []Permission
@@ -196,7 +196,7 @@ func mapClientToProto(client Client) *userpb.Client {
 	}
 }
 
-func (s *Server) GetClients(ctx context.Context, req *userpb.GetClientsRequest) (*userpb.GetClientsResponse, error) {
+func (s *Server) GetClients(_ context.Context, req *userpb.GetClientsRequest) (*userpb.GetClientsResponse, error) {
 	clients, err := s.GetAllClients(strings.TrimSpace(req.FirstName), strings.TrimSpace(req.LastName), strings.TrimSpace(req.Email))
 	if err != nil {
 		log.Printf("Error in retrieving clients: %s", err.Error())
@@ -211,7 +211,7 @@ func (s *Server) GetClients(ctx context.Context, req *userpb.GetClientsRequest) 
 	return &userpb.GetClientsResponse{Clients: clientResponses}, nil
 }
 
-func (s *Server) UpdateClient(ctx context.Context, req *userpb.UpdateClientRequest) (*userpb.UpdateClientResponse, error) {
+func (s *Server) UpdateClient(_ context.Context, req *userpb.UpdateClientRequest) (*userpb.UpdateClientResponse, error) {
 	if req.Id <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "id must be greater than zero")
 	}
@@ -259,238 +259,6 @@ func (s *Server) UpdateClient(ctx context.Context, req *userpb.UpdateClientReque
 	return &userpb.UpdateClientResponse{Valid: true, Response: "Client updated"}, nil
 }
 
-func mapCompanyToProto(company *Company) *userpb.Company {
-	if company == nil {
-		return nil
-	}
-
-	return &userpb.Company{
-		Id:             company.Id,
-		RegisteredId:   company.Registered_id,
-		Name:           company.Name,
-		TaxCode:        company.Tax_code,
-		ActivityCodeId: company.Activity_code_id,
-		Address:        company.Address,
-		OwnerId:        company.Owner_id,
-	}
-}
-
-func validateCreateCompanyInput(registeredID int64, name string, taxCode int64, address string, ownerID int64) error {
-	if registeredID <= 0 {
-		return status.Error(codes.InvalidArgument, "registered id must be greater than zero")
-	}
-	if strings.TrimSpace(name) == "" {
-		return status.Error(codes.InvalidArgument, "name is required")
-	}
-	if taxCode <= 0 {
-		return status.Error(codes.InvalidArgument, "tax code must be greater than zero")
-	}
-	if strings.TrimSpace(address) == "" {
-		return status.Error(codes.InvalidArgument, "address is required")
-	}
-	if ownerID <= 0 {
-		return status.Error(codes.InvalidArgument, "owner id must be greater than zero")
-	}
-	return nil
-}
-
-func validateUpdateCompanyInput(id int64, name string, address string, ownerID int64) error {
-	if id <= 0 {
-		return status.Error(codes.InvalidArgument, "id must be greater than zero")
-	}
-	if strings.TrimSpace(name) == "" {
-		return status.Error(codes.InvalidArgument, "name is required")
-	}
-	if strings.TrimSpace(address) == "" {
-		return status.Error(codes.InvalidArgument, "address is required")
-	}
-	if ownerID <= 0 {
-		return status.Error(codes.InvalidArgument, "owner id must be greater than zero")
-	}
-	return nil
-}
-
-func (s *Server) CreateCompany(ctx context.Context, req *userpb.CreateCompanyRequest) (*userpb.CreateCompanyResponse, error) {
-	if err := validateCreateCompanyInput(req.RegisteredId, req.Name, req.TaxCode, req.Address, req.OwnerId); err != nil {
-		return nil, err
-	}
-
-	company, err := s.CreateCompanyRecord(Company{
-		Registered_id:    req.RegisteredId,
-		Name:             strings.TrimSpace(req.Name),
-		Tax_code:         req.TaxCode,
-		Activity_code_id: req.ActivityCodeId,
-		Address:          strings.TrimSpace(req.Address),
-		Owner_id:         req.OwnerId,
-	})
-	if err != nil {
-		switch {
-		case errors.Is(err, ErrCompanyRegisteredIDExists):
-			return nil, status.Error(codes.AlreadyExists, "company with that registered id already exists")
-		case errors.Is(err, ErrCompanyOwnerNotFound):
-			return nil, status.Error(codes.InvalidArgument, "owner does not exist")
-		case errors.Is(err, ErrCompanyActivityCodeNotFound):
-			return nil, status.Error(codes.InvalidArgument, "activity code does not exist")
-		default:
-			return nil, status.Error(codes.Internal, "company creation failed")
-		}
-	}
-
-	return &userpb.CreateCompanyResponse{Company: mapCompanyToProto(company)}, nil
-}
-
-func (s *Server) GetCompanyById(ctx context.Context, req *userpb.GetCompanyByIdRequest) (*userpb.GetCompanyByIdResponse, error) {
-	if req.Id <= 0 {
-		return nil, status.Error(codes.InvalidArgument, "id must be greater than zero")
-	}
-
-	company, err := s.GetCompanyByIDRecord(req.Id)
-	if err != nil {
-		switch {
-		case errors.Is(err, ErrCompanyNotFound):
-			return nil, status.Error(codes.NotFound, "company not found")
-		default:
-			return nil, status.Error(codes.Internal, "company lookup failed")
-		}
-	}
-
-	return &userpb.GetCompanyByIdResponse{Company: mapCompanyToProto(company)}, nil
-}
-
-func (s *Server) GetCompanies(ctx context.Context, req *userpb.GetCompaniesRequest) (*userpb.GetCompaniesResponse, error) {
-	companies, err := s.GetCompaniesRecords()
-	if err != nil {
-		return nil, status.Error(codes.Internal, "company listing failed")
-	}
-
-	var responseCompanies []*userpb.Company
-	for _, company := range companies {
-		responseCompanies = append(responseCompanies, mapCompanyToProto(company))
-	}
-
-	return &userpb.GetCompaniesResponse{Companies: responseCompanies}, nil
-}
-
-func (s *Server) UpdateCompany(ctx context.Context, req *userpb.UpdateCompanyRequest) (*userpb.UpdateCompanyResponse, error) {
-	if err := validateUpdateCompanyInput(req.Id, req.Name, req.Address, req.OwnerId); err != nil {
-		return nil, err
-	}
-
-	company, err := s.UpdateCompanyRecord(Company{
-		Id:               req.Id,
-		Name:             strings.TrimSpace(req.Name),
-		Activity_code_id: req.ActivityCodeId,
-		Address:          strings.TrimSpace(req.Address),
-		Owner_id:         req.OwnerId,
-	})
-	if err != nil {
-		switch {
-		case errors.Is(err, ErrCompanyNotFound):
-			return nil, status.Error(codes.NotFound, "company not found")
-		case errors.Is(err, ErrCompanyOwnerNotFound):
-			return nil, status.Error(codes.InvalidArgument, "owner does not exist")
-		case errors.Is(err, ErrCompanyActivityCodeNotFound):
-			return nil, status.Error(codes.InvalidArgument, "activity code does not exist")
-		default:
-			return nil, status.Error(codes.Internal, "company update failed")
-		}
-	}
-
-	return &userpb.UpdateCompanyResponse{Company: mapCompanyToProto(company)}, nil
-}
-
-func validateCreateAccountInput(name string, owner int64, currency string, ownerType string, accountType string, maintainanceCost int64, dailyLimit int64, monthlyLimit int64, createdBy int64, validUntil int64) error {
-	if strings.TrimSpace(name) == "" {
-		return status.Error(codes.InvalidArgument, "name is required")
-	}
-	if owner <= 0 {
-		return status.Error(codes.InvalidArgument, "owner must be greater than zero")
-	}
-	if createdBy <= 0 {
-		return status.Error(codes.InvalidArgument, "created_by must be greater than zero")
-	}
-	if strings.TrimSpace(currency) == "" {
-		return status.Error(codes.InvalidArgument, "currency is required")
-	}
-	if ownerType != string(Personal) && ownerType != string(Business) {
-		return status.Error(codes.InvalidArgument, "owner_type must be one of personal or business")
-	}
-	if accountType != string(Checking) && accountType != string(Foreign) {
-		return status.Error(codes.InvalidArgument, "account_type must be one of checking or foreign")
-	}
-	if maintainanceCost < 0 {
-		return status.Error(codes.InvalidArgument, "maintainance_cost must be greater than or equal to zero")
-	}
-	if dailyLimit < 0 {
-		return status.Error(codes.InvalidArgument, "daily_limit must be greater than or equal to zero")
-	}
-	if monthlyLimit < 0 {
-		return status.Error(codes.InvalidArgument, "monthly_limit must be greater than or equal to zero")
-	}
-	if validUntil != 0 && !time.Unix(validUntil, 0).After(time.Now()) {
-		return status.Error(codes.InvalidArgument, "valid_until must be in the future")
-	}
-	return nil
-}
-
-func (s *Server) CreateAccount(ctx context.Context, req *userpb.CreateAccountRequest) (*userpb.CreateAccountResponse, error) {
-	name := strings.TrimSpace(req.Name)
-	currency := strings.TrimSpace(req.Currency)
-	ownerType := strings.TrimSpace(strings.ToLower(req.OwnerType))
-	accountType := strings.TrimSpace(strings.ToLower(req.AccountType))
-
-	if err := validateCreateAccountInput(
-		name,
-		req.Owner,
-		currency,
-		ownerType,
-		accountType,
-		req.MaintainanceCost,
-		req.DailyLimit,
-		req.MonthlyLimit,
-		req.CreatedBy,
-		req.ValidUntil,
-	); err != nil {
-		return nil, err
-	}
-
-	account := Account{
-		Name:              name,
-		Owner:             req.Owner,
-		Currency:          currency,
-		Owner_type:        owner_type(ownerType),
-		Account_type:      account_type(accountType),
-		Maintainance_cost: req.MaintainanceCost,
-		Daily_limit:       req.DailyLimit,
-		Monthly_limit:     req.MonthlyLimit,
-		Created_by:        req.CreatedBy,
-	}
-	if req.ValidUntil != 0 {
-		account.Valid_until = time.Unix(req.ValidUntil, 0)
-	}
-
-	created, err := s.CreateAccountRecord(account)
-	if err != nil {
-		switch {
-		case errors.Is(err, ErrAccountOwnerNotFound):
-			return nil, status.Error(codes.InvalidArgument, "owner does not exist")
-		case errors.Is(err, ErrAccountCreatorNotFound):
-			return nil, status.Error(codes.InvalidArgument, "creator does not exist")
-		case errors.Is(err, ErrAccountCurrencyNotFound):
-			return nil, status.Error(codes.InvalidArgument, "currency does not exist")
-		case errors.Is(err, ErrAccountNumberGenerationFailed):
-			return nil, status.Error(codes.Internal, "account number generation failed")
-		default:
-			return nil, status.Error(codes.Internal, "account creation failed")
-		}
-	}
-
-	return &userpb.CreateAccountResponse{
-		Valid:         true,
-		AccountNumber: created.Number,
-		Error:         "",
-	}, nil
-}
 func (s *Server) GenerateRefreshToken(email string) (string, error) {
 	now := time.Now()
 	claims := jwt.RegisteredClaims{
@@ -544,15 +312,15 @@ func validateJWTToken(tokenString, secret string) (*userpb.ValidateTokenResponse
 	}, nil
 }
 
-func (s *Server) ValidateRefreshToken(ctx context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
+func (s *Server) ValidateRefreshToken(_ context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
 	return validateJWTToken(req.Token, s.refreshJwtSecret)
 }
 
-func (s *Server) ValidateAccessToken(ctx context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
+func (s *Server) ValidateAccessToken(_ context.Context, req *userpb.ValidateTokenRequest) (*userpb.ValidateTokenResponse, error) {
 	return validateJWTToken(req.Token, s.accessJwtSecret)
 }
 
-func (s *Server) Refresh(ctx context.Context, req *userpb.RefreshRequest) (*userpb.RefreshResponse, error) {
+func (s *Server) Refresh(_ context.Context, req *userpb.RefreshRequest) (*userpb.RefreshResponse, error) {
 	token, err := validateJWTToken(req.RefreshToken, s.refreshJwtSecret)
 	if err != nil {
 		return nil, err
@@ -596,7 +364,7 @@ func (s *Server) Refresh(ctx context.Context, req *userpb.RefreshRequest) (*user
 	return &userpb.RefreshResponse{AccessToken: newAccessToken, RefreshToken: newSignedToken}, nil
 }
 
-func (s *Server) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.LoginResponse, error) {
+func (s *Server) Login(_ context.Context, req *userpb.LoginRequest) (*userpb.LoginResponse, error) {
 	user, err := s.GetUserByEmail(req.Email)
 	if err != nil || user == nil {
 		return nil, status.Error(codes.Unauthenticated, "wrong creds")
@@ -626,7 +394,7 @@ func (s *Server) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.L
 	return nil, status.Error(codes.Unauthenticated, "wrong creds")
 }
 
-func (s *Server) Logout(ctx context.Context, req *userpb.LogoutRequest) (*userpb.LogoutResponse, error) {
+func (s *Server) Logout(_ context.Context, req *userpb.LogoutRequest) (*userpb.LogoutResponse, error) {
 	email := req.Email
 	tx, err := s.database.Begin()
 	if err != nil {
@@ -655,7 +423,7 @@ func (s *Server) RequestInitialPasswordSet(ctx context.Context, req *userpb.Pass
 	return s.requestPasswordAction(ctx, strings.TrimSpace(req.Email), passwordActionInitialSet)
 }
 
-func (s *Server) SetPasswordWithToken(ctx context.Context, req *userpb.SetPasswordWithTokenRequest) (*userpb.SetPasswordWithTokenResponse, error) {
+func (s *Server) SetPasswordWithToken(_ context.Context, req *userpb.SetPasswordWithTokenRequest) (*userpb.SetPasswordWithTokenResponse, error) {
 	token := strings.TrimSpace(req.Token)
 	newPassword := strings.TrimSpace(req.NewPassword)
 
@@ -854,7 +622,7 @@ func (s *Server) CreateClientAccount(_ context.Context, req *userpb.CreateClient
 
 }
 
-func (s *Server) CreateEmployeeAccount(_ context.Context, req *userpb.CreateEmployeeRequest) (*userpb.GetEmployeeResponse, error) {
+func (s *Server) CreateEmployeeAccount(ctx context.Context, req *userpb.CreateEmployeeRequest) (*userpb.GetEmployeeResponse, error) {
 	is_null := func(str string) bool {
 		return strings.TrimSpace(str) == ""
 	}

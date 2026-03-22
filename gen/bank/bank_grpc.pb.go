@@ -19,15 +19,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BankService_CreateCompany_FullMethodName  = "/bank.BankService/CreateCompany"
-	BankService_GetCompanyById_FullMethodName = "/bank.BankService/GetCompanyById"
-	BankService_GetCompanies_FullMethodName   = "/bank.BankService/GetCompanies"
-	BankService_UpdateCompany_FullMethodName  = "/bank.BankService/UpdateCompany"
-	BankService_CreateCard_FullMethodName     = "/bank.BankService/CreateCard"
-	BankService_RequestCard_FullMethodName    = "/bank.BankService/RequestCard"
-	BankService_ConfirmCard_FullMethodName    = "/bank.BankService/ConfirmCard"
-	BankService_GetCards_FullMethodName       = "/bank.BankService/GetCards"
-	BankService_BlockCard_FullMethodName      = "/bank.BankService/BlockCard"
+	BankService_CreateCompany_FullMethodName          = "/bank.BankService/CreateCompany"
+	BankService_GetCompanyById_FullMethodName         = "/bank.BankService/GetCompanyById"
+	BankService_GetCompanies_FullMethodName           = "/bank.BankService/GetCompanies"
+	BankService_UpdateCompany_FullMethodName          = "/bank.BankService/UpdateCompany"
+	BankService_CreateCard_FullMethodName             = "/bank.BankService/CreateCard"
+	BankService_RequestCard_FullMethodName            = "/bank.BankService/RequestCard"
+	BankService_ConfirmCard_FullMethodName            = "/bank.BankService/ConfirmCard"
+	BankService_GetCards_FullMethodName               = "/bank.BankService/GetCards"
+	BankService_BlockCard_FullMethodName              = "/bank.BankService/BlockCard"
+	BankService_GetPaymentRecipients_FullMethodName   = "/bank.BankService/GetPaymentRecipients"
+	BankService_CreatePaymentRecipient_FullMethodName = "/bank.BankService/CreatePaymentRecipient"
+	BankService_UpdatePaymentRecipient_FullMethodName = "/bank.BankService/UpdatePaymentRecipient"
+	BankService_DeletePaymentRecipient_FullMethodName = "/bank.BankService/DeletePaymentRecipient"
+	BankService_GetTransactions_FullMethodName        = "/bank.BankService/GetTransactions"
+	BankService_GetTransactionById_FullMethodName     = "/bank.BankService/GetTransactionById"
+	BankService_GenerateTransactionPdf_FullMethodName = "/bank.BankService/GenerateTransactionPdf"
+	BankService_CreateAccount_FullMethodName          = "/bank.BankService/CreateAccount"
 )
 
 // BankServiceClient is the client API for BankService service.
@@ -43,6 +51,14 @@ type BankServiceClient interface {
 	ConfirmCard(ctx context.Context, in *ConfirmCardRequest, opts ...grpc.CallOption) (*ConfirmCardResponse, error)
 	GetCards(ctx context.Context, in *GetCardsRequest, opts ...grpc.CallOption) (*GetCardsResponse, error)
 	BlockCard(ctx context.Context, in *BlockCardRequest, opts ...grpc.CallOption) (*BlockCardResponse, error)
+	GetPaymentRecipients(ctx context.Context, in *GetPaymentRecipientsRequest, opts ...grpc.CallOption) (*GetPaymentRecipientsResponse, error)
+	CreatePaymentRecipient(ctx context.Context, in *CreatePaymentRecipientRequest, opts ...grpc.CallOption) (*CreatePaymentRecipientResponse, error)
+	UpdatePaymentRecipient(ctx context.Context, in *UpdatePaymentRecipientRequest, opts ...grpc.CallOption) (*UpdatePaymentRecipientResponse, error)
+	DeletePaymentRecipient(ctx context.Context, in *DeletePaymentRecipientRequest, opts ...grpc.CallOption) (*DeletePaymentRecipientResponse, error)
+	GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsResponse, error)
+	GetTransactionById(ctx context.Context, in *GetTransactionByIdRequest, opts ...grpc.CallOption) (*GetTransactionByIdResponse, error)
+	GenerateTransactionPdf(ctx context.Context, in *GenerateTransactionPdfRequest, opts ...grpc.CallOption) (*GenerateTransactionPdfResponse, error)
+	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
 }
 
 type bankServiceClient struct {
@@ -143,6 +159,86 @@ func (c *bankServiceClient) BlockCard(ctx context.Context, in *BlockCardRequest,
 	return out, nil
 }
 
+func (c *bankServiceClient) GetPaymentRecipients(ctx context.Context, in *GetPaymentRecipientsRequest, opts ...grpc.CallOption) (*GetPaymentRecipientsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPaymentRecipientsResponse)
+	err := c.cc.Invoke(ctx, BankService_GetPaymentRecipients_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) CreatePaymentRecipient(ctx context.Context, in *CreatePaymentRecipientRequest, opts ...grpc.CallOption) (*CreatePaymentRecipientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreatePaymentRecipientResponse)
+	err := c.cc.Invoke(ctx, BankService_CreatePaymentRecipient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) UpdatePaymentRecipient(ctx context.Context, in *UpdatePaymentRecipientRequest, opts ...grpc.CallOption) (*UpdatePaymentRecipientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdatePaymentRecipientResponse)
+	err := c.cc.Invoke(ctx, BankService_UpdatePaymentRecipient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) DeletePaymentRecipient(ctx context.Context, in *DeletePaymentRecipientRequest, opts ...grpc.CallOption) (*DeletePaymentRecipientResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeletePaymentRecipientResponse)
+	err := c.cc.Invoke(ctx, BankService_DeletePaymentRecipient_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTransactionsResponse)
+	err := c.cc.Invoke(ctx, BankService_GetTransactions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) GetTransactionById(ctx context.Context, in *GetTransactionByIdRequest, opts ...grpc.CallOption) (*GetTransactionByIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTransactionByIdResponse)
+	err := c.cc.Invoke(ctx, BankService_GetTransactionById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) GenerateTransactionPdf(ctx context.Context, in *GenerateTransactionPdfRequest, opts ...grpc.CallOption) (*GenerateTransactionPdfResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateTransactionPdfResponse)
+	err := c.cc.Invoke(ctx, BankService_GenerateTransactionPdf_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateAccountResponse)
+	err := c.cc.Invoke(ctx, BankService_CreateAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BankServiceServer is the server API for BankService service.
 // All implementations must embed UnimplementedBankServiceServer
 // for forward compatibility.
@@ -156,6 +252,14 @@ type BankServiceServer interface {
 	ConfirmCard(context.Context, *ConfirmCardRequest) (*ConfirmCardResponse, error)
 	GetCards(context.Context, *GetCardsRequest) (*GetCardsResponse, error)
 	BlockCard(context.Context, *BlockCardRequest) (*BlockCardResponse, error)
+	GetPaymentRecipients(context.Context, *GetPaymentRecipientsRequest) (*GetPaymentRecipientsResponse, error)
+	CreatePaymentRecipient(context.Context, *CreatePaymentRecipientRequest) (*CreatePaymentRecipientResponse, error)
+	UpdatePaymentRecipient(context.Context, *UpdatePaymentRecipientRequest) (*UpdatePaymentRecipientResponse, error)
+	DeletePaymentRecipient(context.Context, *DeletePaymentRecipientRequest) (*DeletePaymentRecipientResponse, error)
+	GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsResponse, error)
+	GetTransactionById(context.Context, *GetTransactionByIdRequest) (*GetTransactionByIdResponse, error)
+	GenerateTransactionPdf(context.Context, *GenerateTransactionPdfRequest) (*GenerateTransactionPdfResponse, error)
+	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
 	mustEmbedUnimplementedBankServiceServer()
 }
 
@@ -192,6 +296,30 @@ func (UnimplementedBankServiceServer) GetCards(context.Context, *GetCardsRequest
 }
 func (UnimplementedBankServiceServer) BlockCard(context.Context, *BlockCardRequest) (*BlockCardResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method BlockCard not implemented")
+}
+func (UnimplementedBankServiceServer) GetPaymentRecipients(context.Context, *GetPaymentRecipientsRequest) (*GetPaymentRecipientsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPaymentRecipients not implemented")
+}
+func (UnimplementedBankServiceServer) CreatePaymentRecipient(context.Context, *CreatePaymentRecipientRequest) (*CreatePaymentRecipientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreatePaymentRecipient not implemented")
+}
+func (UnimplementedBankServiceServer) UpdatePaymentRecipient(context.Context, *UpdatePaymentRecipientRequest) (*UpdatePaymentRecipientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdatePaymentRecipient not implemented")
+}
+func (UnimplementedBankServiceServer) DeletePaymentRecipient(context.Context, *DeletePaymentRecipientRequest) (*DeletePaymentRecipientResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeletePaymentRecipient not implemented")
+}
+func (UnimplementedBankServiceServer) GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTransactions not implemented")
+}
+func (UnimplementedBankServiceServer) GetTransactionById(context.Context, *GetTransactionByIdRequest) (*GetTransactionByIdResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTransactionById not implemented")
+}
+func (UnimplementedBankServiceServer) GenerateTransactionPdf(context.Context, *GenerateTransactionPdfRequest) (*GenerateTransactionPdfResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GenerateTransactionPdf not implemented")
+}
+func (UnimplementedBankServiceServer) CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateAccount not implemented")
 }
 func (UnimplementedBankServiceServer) mustEmbedUnimplementedBankServiceServer() {}
 func (UnimplementedBankServiceServer) testEmbeddedByValue()                     {}
@@ -376,6 +504,150 @@ func _BankService_BlockCard_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BankService_GetPaymentRecipients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPaymentRecipientsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetPaymentRecipients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetPaymentRecipients_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetPaymentRecipients(ctx, req.(*GetPaymentRecipientsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_CreatePaymentRecipient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePaymentRecipientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).CreatePaymentRecipient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_CreatePaymentRecipient_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).CreatePaymentRecipient(ctx, req.(*CreatePaymentRecipientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_UpdatePaymentRecipient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePaymentRecipientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).UpdatePaymentRecipient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_UpdatePaymentRecipient_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).UpdatePaymentRecipient(ctx, req.(*UpdatePaymentRecipientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_DeletePaymentRecipient_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePaymentRecipientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).DeletePaymentRecipient(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_DeletePaymentRecipient_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).DeletePaymentRecipient(ctx, req.(*DeletePaymentRecipientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_GetTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetTransactions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetTransactions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetTransactions(ctx, req.(*GetTransactionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_GetTransactionById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetTransactionById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetTransactionById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetTransactionById(ctx, req.(*GetTransactionByIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_GenerateTransactionPdf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateTransactionPdfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GenerateTransactionPdf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GenerateTransactionPdf_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GenerateTransactionPdf(ctx, req.(*GenerateTransactionPdfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_CreateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).CreateAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_CreateAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).CreateAccount(ctx, req.(*CreateAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BankService_ServiceDesc is the grpc.ServiceDesc for BankService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +690,38 @@ var BankService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BlockCard",
 			Handler:    _BankService_BlockCard_Handler,
+		},
+		{
+			MethodName: "GetPaymentRecipients",
+			Handler:    _BankService_GetPaymentRecipients_Handler,
+		},
+		{
+			MethodName: "CreatePaymentRecipient",
+			Handler:    _BankService_CreatePaymentRecipient_Handler,
+		},
+		{
+			MethodName: "UpdatePaymentRecipient",
+			Handler:    _BankService_UpdatePaymentRecipient_Handler,
+		},
+		{
+			MethodName: "DeletePaymentRecipient",
+			Handler:    _BankService_DeletePaymentRecipient_Handler,
+		},
+		{
+			MethodName: "GetTransactions",
+			Handler:    _BankService_GetTransactions_Handler,
+		},
+		{
+			MethodName: "GetTransactionById",
+			Handler:    _BankService_GetTransactionById_Handler,
+		},
+		{
+			MethodName: "GenerateTransactionPdf",
+			Handler:    _BankService_GenerateTransactionPdf_Handler,
+		},
+		{
+			MethodName: "CreateAccount",
+			Handler:    _BankService_CreateAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

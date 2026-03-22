@@ -88,6 +88,15 @@ type (
 		Active      bool   `gorm:"column:active;type:BOOLEAN;not null;default:true"`
 	}
 
+	PaymentRecipient struct {
+		Id             int64     `gorm:"column:id;type:bigserial;not null;primaryKey"`
+		Client_id      int64     `gorm:"column:client_id;type:bigint;not null;references clients(id)"`
+		Name           string    `gorm:"column:name;type:varchar(127);not null"`
+		Account_number string    `gorm:"column:account_number;type:varchar(20);not null"`
+		Created_at     time.Time `gorm:"column:created_at;not null;autoCreateTime"`
+		Updated_at     time.Time `gorm:"column:updated_at;not null;autoUpdateTime"`
+	}
+
 	Account struct {
 		Id                  int64        `gorm:"column:id;type:bigserial;not null;primaryKey"`
 		Number              string       `gorm:"column:number;type:varchar(20);not null;unique"`
@@ -294,4 +303,7 @@ func (VerificationCode) TableName() string {
 
 func (CardRequest) TableName() string {
 	return "card_requests"
+}
+func (PaymentRecipient) TableName() string {
+	return "payment_recipients"
 }

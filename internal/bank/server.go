@@ -10,15 +10,9 @@ import (
 	"time"
 
 	"errors"
-	"github.com/go-pdf/fpdf"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"gorm.io/gorm"
-	"fmt"
-	"strings"
-	"time"
 
 	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
+	"github.com/go-pdf/fpdf"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -89,7 +83,7 @@ func validateUpdateCompanyInput(id int64, name string, address string, ownerID i
 	return nil
 }
 
-func (s *Server) CreateCompany(ctx context.Context, req *bankpb.CreateCompanyRequest) (*bankpb.CreateCompanyResponse, error) {
+func (s *Server) CreateCompany(_ context.Context, req *bankpb.CreateCompanyRequest) (*bankpb.CreateCompanyResponse, error) {
 	if err := validateCreateCompanyInput(req.RegisteredId, req.Name, req.TaxCode, req.Address, req.OwnerId); err != nil {
 		return nil, err
 	}
@@ -118,7 +112,7 @@ func (s *Server) CreateCompany(ctx context.Context, req *bankpb.CreateCompanyReq
 	return &bankpb.CreateCompanyResponse{Company: mapCompanyToProto(company)}, nil
 }
 
-func (s *Server) GetCompanyById(ctx context.Context, req *bankpb.GetCompanyByIdRequest) (*bankpb.GetCompanyByIdResponse, error) {
+func (s *Server) GetCompanyById(_ context.Context, req *bankpb.GetCompanyByIdRequest) (*bankpb.GetCompanyByIdResponse, error) {
 	if req.Id <= 0 {
 		return nil, status.Error(codes.InvalidArgument, "id must be greater than zero")
 	}
@@ -136,7 +130,7 @@ func (s *Server) GetCompanyById(ctx context.Context, req *bankpb.GetCompanyByIdR
 	return &bankpb.GetCompanyByIdResponse{Company: mapCompanyToProto(company)}, nil
 }
 
-func (s *Server) GetCompanies(ctx context.Context, req *bankpb.GetCompaniesRequest) (*bankpb.GetCompaniesResponse, error) {
+func (s *Server) GetCompanies(_ context.Context, _ *bankpb.GetCompaniesRequest) (*bankpb.GetCompaniesResponse, error) {
 	companies, err := s.GetCompaniesRecords()
 	if err != nil {
 		return nil, status.Error(codes.Internal, "company listing failed")
@@ -150,7 +144,7 @@ func (s *Server) GetCompanies(ctx context.Context, req *bankpb.GetCompaniesReque
 	return &bankpb.GetCompaniesResponse{Companies: responseCompanies}, nil
 }
 
-func (s *Server) UpdateCompany(ctx context.Context, req *bankpb.UpdateCompanyRequest) (*bankpb.UpdateCompanyResponse, error) {
+func (s *Server) UpdateCompany(_ context.Context, req *bankpb.UpdateCompanyRequest) (*bankpb.UpdateCompanyResponse, error) {
 	if err := validateUpdateCompanyInput(req.Id, req.Name, req.Address, req.OwnerId); err != nil {
 		return nil, err
 	}
@@ -1029,5 +1023,98 @@ func (s *Server) GenerateTransactionPdf(
 	return &bankpb.GenerateTransactionPdfResponse{
 		Pdf:      buf.Bytes(),
 		FileName: fileName,
+	}, nil
+}
+
+func validateCreateAccountInput(name string, owner int64, currency string, ownerType string, accountType string, maintainanceCost int64, dailyLimit int64, monthlyLimit int64, createdBy int64, validUntil int64) error {
+	if strings.TrimSpace(name) == "" {
+		return status.Error(codes.InvalidArgument, "name is required")
+	}
+	if owner <= 0 {
+		return status.Error(codes.InvalidArgument, "owner must be greater than zero")
+	}
+	if createdBy <= 0 {
+		return status.Error(codes.InvalidArgument, "created_by must be greater than zero")
+	}
+	if strings.TrimSpace(currency) == "" {
+		return status.Error(codes.InvalidArgument, "currency is required")
+	}
+	if ownerType != string(Personal) && ownerType != string(Business) {
+		return status.Error(codes.InvalidArgument, "owner_type must be one of personal or business")
+	}
+	if accountType != string(Checking) && accountType != string(Foreign) {
+		return status.Error(codes.InvalidArgument, "account_type must be one of checking or foreign")
+	}
+	if maintainanceCost < 0 {
+		return status.Error(codes.InvalidArgument, "maintainance_cost must be greater than or equal to zero")
+	}
+	if dailyLimit < 0 {
+		return status.Error(codes.InvalidArgument, "daily_limit must be greater than or equal to zero")
+	}
+	if monthlyLimit < 0 {
+		return status.Error(codes.InvalidArgument, "monthly_limit must be greater than or equal to zero")
+	}
+	if validUntil != 0 && !time.Unix(validUntil, 0).After(time.Now()) {
+		return status.Error(codes.InvalidArgument, "valid_until must be in the future")
+	}
+	return nil
+}
+
+func (s *Server) CreateAccount(_ context.Context, req *bankpb.CreateAccountRequest) (*bankpb.CreateAccountResponse, error) {
+	name := strings.TrimSpace(req.Name)
+	currency := strings.TrimSpace(req.Currency)
+	ownerType := strings.TrimSpace(strings.ToLower(req.OwnerType))
+	accountType := strings.TrimSpace(strings.ToLower(req.AccountType))
+
+	if err := validateCreateAccountInput(
+		name,
+		req.Owner,
+		currency,
+		ownerType,
+		accountType,
+		req.MaintainanceCost,
+		req.DailyLimit,
+		req.MonthlyLimit,
+		req.CreatedBy,
+		req.ValidUntil,
+	); err != nil {
+		return nil, err
+	}
+
+	account := Account{
+		Name:              name,
+		Owner:             req.Owner,
+		Currency:          currency,
+		Owner_type:        owner_type(ownerType),
+		Account_type:      account_type(accountType),
+		Maintainance_cost: req.MaintainanceCost,
+		Daily_limit:       req.DailyLimit,
+		Monthly_limit:     req.MonthlyLimit,
+		Created_by:        req.CreatedBy,
+	}
+	if req.ValidUntil != 0 {
+		account.Valid_until = time.Unix(req.ValidUntil, 0)
+	}
+
+	created, err := s.CreateAccountRecord(account)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrAccountOwnerNotFound):
+			return nil, status.Error(codes.InvalidArgument, "owner does not exist")
+		case errors.Is(err, ErrAccountCreatorNotFound):
+			return nil, status.Error(codes.InvalidArgument, "creator does not exist")
+		case errors.Is(err, ErrAccountCurrencyNotFound):
+			return nil, status.Error(codes.InvalidArgument, "currency does not exist")
+		case errors.Is(err, ErrAccountNumberGenerationFailed):
+			return nil, status.Error(codes.Internal, "account number generation failed")
+		default:
+			return nil, status.Error(codes.Internal, "account creation failed")
+		}
+	}
+
+	return &bankpb.CreateAccountResponse{
+		Valid:         true,
+		AccountNumber: created.Number,
+		Error:         "",
 	}, nil
 }

@@ -1,4 +1,4 @@
-package user
+package bank
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	userpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/user"
+	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	"github.com/jackc/pgx/v5/pgconn"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -80,7 +80,7 @@ func TestCreateAccountSuccess(t *testing.T) {
 		))
 	mock.ExpectCommit()
 
-	resp, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	resp, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Licni racun",
 		Owner:            1,
 		Currency:         "EUR",
@@ -108,7 +108,7 @@ func TestCreateAccountInvalidOwnerType(t *testing.T) {
 	server, mock, db := newTestServer(t)
 	defer func() { _ = db.Close() }()
 
-	_, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	_, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Racun",
 		Owner:            1,
 		Currency:         "EUR",
@@ -132,7 +132,7 @@ func TestCreateAccountInvalidAccountType(t *testing.T) {
 	server, mock, db := newTestServer(t)
 	defer func() { _ = db.Close() }()
 
-	_, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	_, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Racun",
 		Owner:            1,
 		Currency:         "EUR",
@@ -156,7 +156,7 @@ func TestCreateAccountNegativeMaintainanceCost(t *testing.T) {
 	server, mock, db := newTestServer(t)
 	defer func() { _ = db.Close() }()
 
-	_, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	_, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Racun",
 		Owner:            1,
 		Currency:         "EUR",
@@ -185,7 +185,7 @@ func TestCreateAccountOwnerNotFound(t *testing.T) {
 		WithArgs(int64(44)).
 		WillReturnRows(sqlmockBoolRow(false))
 
-	_, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	_, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Racun",
 		Owner:            44,
 		Currency:         "EUR",
@@ -217,7 +217,7 @@ func TestCreateAccountCreatorNotFound(t *testing.T) {
 		WithArgs(int64(77)).
 		WillReturnRows(sqlmockBoolRow(false))
 
-	_, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	_, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Racun",
 		Owner:            1,
 		Currency:         "EUR",
@@ -252,7 +252,7 @@ func TestCreateAccountCurrencyNotFound(t *testing.T) {
 		WithArgs("USD").
 		WillReturnRows(sqlmockBoolRow(false))
 
-	_, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	_, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Racun",
 		Owner:            1,
 		Currency:         "USD",
@@ -331,7 +331,7 @@ func TestCreateAccountDefaultValidUntilAndZeroLimitsBecomeNull(t *testing.T) {
 		))
 	mock.ExpectCommit()
 
-	resp, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	resp, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Stednja",
 		Owner:            1,
 		Currency:         "EUR",
@@ -444,7 +444,7 @@ func TestCreateAccountNumberCollisionRetryPath(t *testing.T) {
 		))
 	mock.ExpectCommit()
 
-	resp, err := server.CreateAccount(context.Background(), &userpb.CreateAccountRequest{
+	resp, err := server.CreateAccount(context.Background(), &bankpb.CreateAccountRequest{
 		Name:             "Retry racun",
 		Owner:            1,
 		Currency:         "EUR",
