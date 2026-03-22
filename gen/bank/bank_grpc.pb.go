@@ -36,6 +36,9 @@ const (
 	BankService_GetTransactionById_FullMethodName     = "/bank.BankService/GetTransactionById"
 	BankService_GenerateTransactionPdf_FullMethodName = "/bank.BankService/GenerateTransactionPdf"
 	BankService_CreateAccount_FullMethodName          = "/bank.BankService/CreateAccount"
+	BankService_GetLoans_FullMethodName               = "/bank.BankService/GetLoans"
+	BankService_GetLoanByNumber_FullMethodName        = "/bank.BankService/GetLoanByNumber"
+	BankService_CreateLoanRequest_FullMethodName      = "/bank.BankService/CreateLoanRequest"
 )
 
 // BankServiceClient is the client API for BankService service.
@@ -59,6 +62,9 @@ type BankServiceClient interface {
 	GetTransactionById(ctx context.Context, in *GetTransactionByIdRequest, opts ...grpc.CallOption) (*GetTransactionByIdResponse, error)
 	GenerateTransactionPdf(ctx context.Context, in *GenerateTransactionPdfRequest, opts ...grpc.CallOption) (*GenerateTransactionPdfResponse, error)
 	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
+	GetLoans(ctx context.Context, in *GetLoansRequest, opts ...grpc.CallOption) (*GetLoansResponse, error)
+	GetLoanByNumber(ctx context.Context, in *GetLoanByNumberRequest, opts ...grpc.CallOption) (*Loan, error)
+	CreateLoanRequest(ctx context.Context, in *CreateLoanRequestRequest, opts ...grpc.CallOption) (*CreateLoanRequestResponse, error)
 }
 
 type bankServiceClient struct {
@@ -239,6 +245,36 @@ func (c *bankServiceClient) CreateAccount(ctx context.Context, in *CreateAccount
 	return out, nil
 }
 
+func (c *bankServiceClient) GetLoans(ctx context.Context, in *GetLoansRequest, opts ...grpc.CallOption) (*GetLoansResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLoansResponse)
+	err := c.cc.Invoke(ctx, BankService_GetLoans_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) GetLoanByNumber(ctx context.Context, in *GetLoanByNumberRequest, opts ...grpc.CallOption) (*Loan, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Loan)
+	err := c.cc.Invoke(ctx, BankService_GetLoanByNumber_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bankServiceClient) CreateLoanRequest(ctx context.Context, in *CreateLoanRequestRequest, opts ...grpc.CallOption) (*CreateLoanRequestResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateLoanRequestResponse)
+	err := c.cc.Invoke(ctx, BankService_CreateLoanRequest_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BankServiceServer is the server API for BankService service.
 // All implementations must embed UnimplementedBankServiceServer
 // for forward compatibility.
@@ -260,6 +296,9 @@ type BankServiceServer interface {
 	GetTransactionById(context.Context, *GetTransactionByIdRequest) (*GetTransactionByIdResponse, error)
 	GenerateTransactionPdf(context.Context, *GenerateTransactionPdfRequest) (*GenerateTransactionPdfResponse, error)
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
+	GetLoans(context.Context, *GetLoansRequest) (*GetLoansResponse, error)
+	GetLoanByNumber(context.Context, *GetLoanByNumberRequest) (*Loan, error)
+	CreateLoanRequest(context.Context, *CreateLoanRequestRequest) (*CreateLoanRequestResponse, error)
 	mustEmbedUnimplementedBankServiceServer()
 }
 
@@ -320,6 +359,15 @@ func (UnimplementedBankServiceServer) GenerateTransactionPdf(context.Context, *G
 }
 func (UnimplementedBankServiceServer) CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateAccount not implemented")
+}
+func (UnimplementedBankServiceServer) GetLoans(context.Context, *GetLoansRequest) (*GetLoansResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetLoans not implemented")
+}
+func (UnimplementedBankServiceServer) GetLoanByNumber(context.Context, *GetLoanByNumberRequest) (*Loan, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetLoanByNumber not implemented")
+}
+func (UnimplementedBankServiceServer) CreateLoanRequest(context.Context, *CreateLoanRequestRequest) (*CreateLoanRequestResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateLoanRequest not implemented")
 }
 func (UnimplementedBankServiceServer) mustEmbedUnimplementedBankServiceServer() {}
 func (UnimplementedBankServiceServer) testEmbeddedByValue()                     {}
@@ -648,6 +696,60 @@ func _BankService_CreateAccount_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BankService_GetLoans_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLoansRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetLoans(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetLoans_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetLoans(ctx, req.(*GetLoansRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_GetLoanByNumber_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLoanByNumberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetLoanByNumber(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetLoanByNumber_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetLoanByNumber(ctx, req.(*GetLoanByNumberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BankService_CreateLoanRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateLoanRequestRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).CreateLoanRequest(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_CreateLoanRequest_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).CreateLoanRequest(ctx, req.(*CreateLoanRequestRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BankService_ServiceDesc is the grpc.ServiceDesc for BankService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -722,6 +824,18 @@ var BankService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateAccount",
 			Handler:    _BankService_CreateAccount_Handler,
+		},
+		{
+			MethodName: "GetLoans",
+			Handler:    _BankService_GetLoans_Handler,
+		},
+		{
+			MethodName: "GetLoanByNumber",
+			Handler:    _BankService_GetLoanByNumber_Handler,
+		},
+		{
+			MethodName: "CreateLoanRequest",
+			Handler:    _BankService_CreateLoanRequest_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

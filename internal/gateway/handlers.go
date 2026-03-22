@@ -650,7 +650,7 @@ func (s *Server) GetLoans(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.UserClient.GetLoans(ctx, &userpb.GetLoansRequest{
+	resp, err := s.BankClient.GetLoans(ctx, &bankpb.GetLoansRequest{
 		ClientEmail:   c.GetString("email"),
 		LoanType:      query.LoanType,
 		AccountNumber: query.AccountNumber,
@@ -694,7 +694,7 @@ func (s *Server) GetLoanByNumber(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	resp, err := s.UserClient.GetLoanByNumber(ctx, &userpb.GetLoanByNumberRequest{
+	resp, err := s.BankClient.GetLoanByNumber(ctx, &bankpb.GetLoanByNumberRequest{
 		ClientEmail: c.GetString("email"),
 		LoanNumber:  uri.LoanNumber,
 	})
@@ -731,7 +731,7 @@ func (s *Server) CreateLoanRequest(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	_, err := s.UserClient.CreateLoanRequest(ctx, &userpb.CreateLoanRequestRequest{
+	_, err := s.BankClient.CreateLoanRequest(ctx, &bankpb.CreateLoanRequestRequest{
 		ClientEmail:     c.GetString("email"),
 		AccountNumber:   req.AccountNumber,
 		LoanType:        req.LoanType,

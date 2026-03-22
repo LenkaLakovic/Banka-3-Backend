@@ -1849,439 +1849,6 @@ func (x *UpdateEmployeeRequest) GetPermissions() []string {
 	return nil
 }
 
-// move to bank.proto later
-type Loan struct {
-	state                 protoimpl.MessageState `protogen:"open.v1"`
-	LoanNumber            string                 `protobuf:"bytes,1,opt,name=loan_number,json=loanNumber,proto3" json:"loan_number,omitempty"`
-	LoanType              string                 `protobuf:"bytes,2,opt,name=loan_type,json=loanType,proto3" json:"loan_type,omitempty"`
-	AccountNumber         string                 `protobuf:"bytes,3,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
-	LoanAmount            float64                `protobuf:"fixed64,4,opt,name=loan_amount,json=loanAmount,proto3" json:"loan_amount,omitempty"`
-	RepaymentPeriod       int32                  `protobuf:"varint,5,opt,name=repayment_period,json=repaymentPeriod,proto3" json:"repayment_period,omitempty"`
-	NominalRate           float64                `protobuf:"fixed64,6,opt,name=nominal_rate,json=nominalRate,proto3" json:"nominal_rate,omitempty"`
-	EffectiveRate         float64                `protobuf:"fixed64,7,opt,name=effective_rate,json=effectiveRate,proto3" json:"effective_rate,omitempty"`
-	AgreementDate         string                 `protobuf:"bytes,8,opt,name=agreement_date,json=agreementDate,proto3" json:"agreement_date,omitempty"`
-	MaturityDate          string                 `protobuf:"bytes,9,opt,name=maturity_date,json=maturityDate,proto3" json:"maturity_date,omitempty"`
-	NextInstallmentAmount float64                `protobuf:"fixed64,10,opt,name=next_installment_amount,json=nextInstallmentAmount,proto3" json:"next_installment_amount,omitempty"`
-	NextInstallmentDate   string                 `protobuf:"bytes,11,opt,name=next_installment_date,json=nextInstallmentDate,proto3" json:"next_installment_date,omitempty"`
-	RemainingDebt         float64                `protobuf:"fixed64,12,opt,name=remaining_debt,json=remainingDebt,proto3" json:"remaining_debt,omitempty"`
-	Currency              string                 `protobuf:"bytes,13,opt,name=currency,proto3" json:"currency,omitempty"`
-	Status                string                 `protobuf:"bytes,14,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
-}
-
-func (x *Loan) Reset() {
-	*x = Loan{}
-	mi := &file_user_user_proto_msgTypes[29]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Loan) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Loan) ProtoMessage() {}
-
-func (x *Loan) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[29]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Loan.ProtoReflect.Descriptor instead.
-func (*Loan) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{29}
-}
-
-func (x *Loan) GetLoanNumber() string {
-	if x != nil {
-		return x.LoanNumber
-	}
-	return ""
-}
-
-func (x *Loan) GetLoanType() string {
-	if x != nil {
-		return x.LoanType
-	}
-	return ""
-}
-
-func (x *Loan) GetAccountNumber() string {
-	if x != nil {
-		return x.AccountNumber
-	}
-	return ""
-}
-
-func (x *Loan) GetLoanAmount() float64 {
-	if x != nil {
-		return x.LoanAmount
-	}
-	return 0
-}
-
-func (x *Loan) GetRepaymentPeriod() int32 {
-	if x != nil {
-		return x.RepaymentPeriod
-	}
-	return 0
-}
-
-func (x *Loan) GetNominalRate() float64 {
-	if x != nil {
-		return x.NominalRate
-	}
-	return 0
-}
-
-func (x *Loan) GetEffectiveRate() float64 {
-	if x != nil {
-		return x.EffectiveRate
-	}
-	return 0
-}
-
-func (x *Loan) GetAgreementDate() string {
-	if x != nil {
-		return x.AgreementDate
-	}
-	return ""
-}
-
-func (x *Loan) GetMaturityDate() string {
-	if x != nil {
-		return x.MaturityDate
-	}
-	return ""
-}
-
-func (x *Loan) GetNextInstallmentAmount() float64 {
-	if x != nil {
-		return x.NextInstallmentAmount
-	}
-	return 0
-}
-
-func (x *Loan) GetNextInstallmentDate() string {
-	if x != nil {
-		return x.NextInstallmentDate
-	}
-	return ""
-}
-
-func (x *Loan) GetRemainingDebt() float64 {
-	if x != nil {
-		return x.RemainingDebt
-	}
-	return 0
-}
-
-func (x *Loan) GetCurrency() string {
-	if x != nil {
-		return x.Currency
-	}
-	return ""
-}
-
-func (x *Loan) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-type GetLoansRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientEmail   string                 `protobuf:"bytes,1,opt,name=client_email,json=clientEmail,proto3" json:"client_email,omitempty"`
-	LoanType      string                 `protobuf:"bytes,2,opt,name=loan_type,json=loanType,proto3" json:"loan_type,omitempty"`
-	AccountNumber string                 `protobuf:"bytes,3,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetLoansRequest) Reset() {
-	*x = GetLoansRequest{}
-	mi := &file_user_user_proto_msgTypes[30]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetLoansRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetLoansRequest) ProtoMessage() {}
-
-func (x *GetLoansRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[30]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetLoansRequest.ProtoReflect.Descriptor instead.
-func (*GetLoansRequest) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{30}
-}
-
-func (x *GetLoansRequest) GetClientEmail() string {
-	if x != nil {
-		return x.ClientEmail
-	}
-	return ""
-}
-
-func (x *GetLoansRequest) GetLoanType() string {
-	if x != nil {
-		return x.LoanType
-	}
-	return ""
-}
-
-func (x *GetLoansRequest) GetAccountNumber() string {
-	if x != nil {
-		return x.AccountNumber
-	}
-	return ""
-}
-
-func (x *GetLoansRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
-type GetLoansResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Loans         []*Loan                `protobuf:"bytes,1,rep,name=loans,proto3" json:"loans,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetLoansResponse) Reset() {
-	*x = GetLoansResponse{}
-	mi := &file_user_user_proto_msgTypes[31]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetLoansResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetLoansResponse) ProtoMessage() {}
-
-func (x *GetLoansResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[31]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetLoansResponse.ProtoReflect.Descriptor instead.
-func (*GetLoansResponse) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *GetLoansResponse) GetLoans() []*Loan {
-	if x != nil {
-		return x.Loans
-	}
-	return nil
-}
-
-type GetLoanByNumberRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientEmail   string                 `protobuf:"bytes,1,opt,name=client_email,json=clientEmail,proto3" json:"client_email,omitempty"`
-	LoanNumber    string                 `protobuf:"bytes,2,opt,name=loan_number,json=loanNumber,proto3" json:"loan_number,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetLoanByNumberRequest) Reset() {
-	*x = GetLoanByNumberRequest{}
-	mi := &file_user_user_proto_msgTypes[32]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetLoanByNumberRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetLoanByNumberRequest) ProtoMessage() {}
-
-func (x *GetLoanByNumberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[32]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetLoanByNumberRequest.ProtoReflect.Descriptor instead.
-func (*GetLoanByNumberRequest) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{32}
-}
-
-func (x *GetLoanByNumberRequest) GetClientEmail() string {
-	if x != nil {
-		return x.ClientEmail
-	}
-	return ""
-}
-
-func (x *GetLoanByNumberRequest) GetLoanNumber() string {
-	if x != nil {
-		return x.LoanNumber
-	}
-	return ""
-}
-
-type CreateLoanRequestRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	ClientEmail     string                 `protobuf:"bytes,1,opt,name=client_email,json=clientEmail,proto3" json:"client_email,omitempty"`
-	AccountNumber   string                 `protobuf:"bytes,2,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
-	LoanType        string                 `protobuf:"bytes,3,opt,name=loan_type,json=loanType,proto3" json:"loan_type,omitempty"`
-	Amount          float64                `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty"`
-	RepaymentPeriod int32                  `protobuf:"varint,5,opt,name=repayment_period,json=repaymentPeriod,proto3" json:"repayment_period,omitempty"`
-	Currency        string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *CreateLoanRequestRequest) Reset() {
-	*x = CreateLoanRequestRequest{}
-	mi := &file_user_user_proto_msgTypes[33]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateLoanRequestRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateLoanRequestRequest) ProtoMessage() {}
-
-func (x *CreateLoanRequestRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[33]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateLoanRequestRequest.ProtoReflect.Descriptor instead.
-func (*CreateLoanRequestRequest) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{33}
-}
-
-func (x *CreateLoanRequestRequest) GetClientEmail() string {
-	if x != nil {
-		return x.ClientEmail
-	}
-	return ""
-}
-
-func (x *CreateLoanRequestRequest) GetAccountNumber() string {
-	if x != nil {
-		return x.AccountNumber
-	}
-	return ""
-}
-
-func (x *CreateLoanRequestRequest) GetLoanType() string {
-	if x != nil {
-		return x.LoanType
-	}
-	return ""
-}
-
-func (x *CreateLoanRequestRequest) GetAmount() float64 {
-	if x != nil {
-		return x.Amount
-	}
-	return 0
-}
-
-func (x *CreateLoanRequestRequest) GetRepaymentPeriod() int32 {
-	if x != nil {
-		return x.RepaymentPeriod
-	}
-	return 0
-}
-
-func (x *CreateLoanRequestRequest) GetCurrency() string {
-	if x != nil {
-		return x.Currency
-	}
-	return ""
-}
-
-type CreateLoanRequestResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateLoanRequestResponse) Reset() {
-	*x = CreateLoanRequestResponse{}
-	mi := &file_user_user_proto_msgTypes[34]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateLoanRequestResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateLoanRequestResponse) ProtoMessage() {}
-
-func (x *CreateLoanRequestResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[34]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateLoanRequestResponse.ProtoReflect.Descriptor instead.
-func (*CreateLoanRequestResponse) Descriptor() ([]byte, []int) {
-	return file_user_user_proto_rawDescGZIP(), []int{34}
-}
-
 type GetEmployeesResponse_Employee struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -2297,7 +1864,7 @@ type GetEmployeesResponse_Employee struct {
 
 func (x *GetEmployeesResponse_Employee) Reset() {
 	*x = GetEmployeesResponse_Employee{}
-	mi := &file_user_user_proto_msgTypes[35]
+	mi := &file_user_user_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2309,7 +1876,7 @@ func (x *GetEmployeesResponse_Employee) String() string {
 func (*GetEmployeesResponse_Employee) ProtoMessage() {}
 
 func (x *GetEmployeesResponse_Employee) ProtoReflect() protoreflect.Message {
-	mi := &file_user_user_proto_msgTypes[35]
+	mi := &file_user_user_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2534,45 +2101,7 @@ const file_user_user_proto_rawDesc = "" +
 	"department\x12\x16\n" +
 	"\x06active\x18\t \x01(\bR\x06active\x12 \n" +
 	"\vpermissions\x18\n" +
-	" \x03(\tR\vpermissions\"\x94\x04\n" +
-	"\x04Loan\x12\x1f\n" +
-	"\vloan_number\x18\x01 \x01(\tR\n" +
-	"loanNumber\x12\x1b\n" +
-	"\tloan_type\x18\x02 \x01(\tR\bloanType\x12%\n" +
-	"\x0eaccount_number\x18\x03 \x01(\tR\raccountNumber\x12\x1f\n" +
-	"\vloan_amount\x18\x04 \x01(\x01R\n" +
-	"loanAmount\x12)\n" +
-	"\x10repayment_period\x18\x05 \x01(\x05R\x0frepaymentPeriod\x12!\n" +
-	"\fnominal_rate\x18\x06 \x01(\x01R\vnominalRate\x12%\n" +
-	"\x0eeffective_rate\x18\a \x01(\x01R\reffectiveRate\x12%\n" +
-	"\x0eagreement_date\x18\b \x01(\tR\ragreementDate\x12#\n" +
-	"\rmaturity_date\x18\t \x01(\tR\fmaturityDate\x126\n" +
-	"\x17next_installment_amount\x18\n" +
-	" \x01(\x01R\x15nextInstallmentAmount\x122\n" +
-	"\x15next_installment_date\x18\v \x01(\tR\x13nextInstallmentDate\x12%\n" +
-	"\x0eremaining_debt\x18\f \x01(\x01R\rremainingDebt\x12\x1a\n" +
-	"\bcurrency\x18\r \x01(\tR\bcurrency\x12\x16\n" +
-	"\x06status\x18\x0e \x01(\tR\x06status\"\x90\x01\n" +
-	"\x0fGetLoansRequest\x12!\n" +
-	"\fclient_email\x18\x01 \x01(\tR\vclientEmail\x12\x1b\n" +
-	"\tloan_type\x18\x02 \x01(\tR\bloanType\x12%\n" +
-	"\x0eaccount_number\x18\x03 \x01(\tR\raccountNumber\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\"4\n" +
-	"\x10GetLoansResponse\x12 \n" +
-	"\x05loans\x18\x01 \x03(\v2\n" +
-	".user.LoanR\x05loans\"\\\n" +
-	"\x16GetLoanByNumberRequest\x12!\n" +
-	"\fclient_email\x18\x01 \x01(\tR\vclientEmail\x12\x1f\n" +
-	"\vloan_number\x18\x02 \x01(\tR\n" +
-	"loanNumber\"\xe0\x01\n" +
-	"\x18CreateLoanRequestRequest\x12!\n" +
-	"\fclient_email\x18\x01 \x01(\tR\vclientEmail\x12%\n" +
-	"\x0eaccount_number\x18\x02 \x01(\tR\raccountNumber\x12\x1b\n" +
-	"\tloan_type\x18\x03 \x01(\tR\bloanType\x12\x16\n" +
-	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12)\n" +
-	"\x10repayment_period\x18\x05 \x01(\x05R\x0frepaymentPeriod\x12\x1a\n" +
-	"\bcurrency\x18\x06 \x01(\tR\bcurrency\"\x1b\n" +
-	"\x19CreateLoanRequestResponse2\xc8\v\n" +
+	" \x03(\tR\vpermissions2\xfa\t\n" +
 	"\vUserService\x12J\n" +
 	"\x0fGetEmployeeById\x12\x1c.user.GetEmployeeByIdRequest\x1a\x19.user.GetEmployeeResponse\x12P\n" +
 	"\x12GetEmployeeByEmail\x12\x1f.user.GetEmployeeByEmailRequest\x1a\x19.user.GetEmployeeResponse\x12E\n" +
@@ -2591,11 +2120,7 @@ const file_user_user_proto_rawDesc = "" +
 	"\n" +
 	"GetClients\x12\x17.user.GetClientsRequest\x1a\x18.user.GetClientsResponse\x12E\n" +
 	"\fUpdateClient\x12\x19.user.UpdateClientRequest\x1a\x1a.user.UpdateClientResponse\x12O\n" +
-	"\x15CreateEmployeeAccount\x12\x1b.user.CreateEmployeeRequest\x1a\x19.user.GetEmployeeResponse\x129\n" +
-	"\bGetLoans\x12\x15.user.GetLoansRequest\x1a\x16.user.GetLoansResponse\x12;\n" +
-	"\x0fGetLoanByNumber\x12\x1c.user.GetLoanByNumberRequest\x1a\n" +
-	".user.Loan\x12T\n" +
-	"\x11CreateLoanRequest\x12\x1e.user.CreateLoanRequestRequest\x1a\x1f.user.CreateLoanRequestResponseB1Z/github.com/RAF-SI-2025/Banka-3-Backend/gen/userb\x06proto3"
+	"\x15CreateEmployeeAccount\x12\x1b.user.CreateEmployeeRequest\x1a\x19.user.GetEmployeeResponseB1Z/github.com/RAF-SI-2025/Banka-3-Backend/gen/userb\x06proto3"
 
 var (
 	file_user_user_proto_rawDescOnce sync.Once
@@ -2609,7 +2134,7 @@ func file_user_user_proto_rawDescGZIP() []byte {
 	return file_user_user_proto_rawDescData
 }
 
-var file_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_user_user_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_user_user_proto_goTypes = []any{
 	(*DeleteEmployeeRequest)(nil),         // 0: user.DeleteEmployeeRequest
 	(*DeleteEmployeeResponse)(nil),        // 1: user.DeleteEmployeeResponse
@@ -2640,63 +2165,50 @@ var file_user_user_proto_goTypes = []any{
 	(*GetEmployeeByEmailRequest)(nil),     // 26: user.GetEmployeeByEmailRequest
 	(*GetEmployeeResponse)(nil),           // 27: user.GetEmployeeResponse
 	(*UpdateEmployeeRequest)(nil),         // 28: user.UpdateEmployeeRequest
-	(*Loan)(nil),                          // 29: user.Loan
-	(*GetLoansRequest)(nil),               // 30: user.GetLoansRequest
-	(*GetLoansResponse)(nil),              // 31: user.GetLoansResponse
-	(*GetLoanByNumberRequest)(nil),        // 32: user.GetLoanByNumberRequest
-	(*CreateLoanRequestRequest)(nil),      // 33: user.CreateLoanRequestRequest
-	(*CreateLoanRequestResponse)(nil),     // 34: user.CreateLoanRequestResponse
-	(*GetEmployeesResponse_Employee)(nil), // 35: user.GetEmployeesResponse.Employee
+	(*GetEmployeesResponse_Employee)(nil), // 29: user.GetEmployeesResponse.Employee
 }
 var file_user_user_proto_depIdxs = []int32{
 	18, // 0: user.GetClientsResponse.Clients:type_name -> user.Client
-	35, // 1: user.GetEmployeesResponse.employees:type_name -> user.GetEmployeesResponse.Employee
-	29, // 2: user.GetLoansResponse.loans:type_name -> user.Loan
-	25, // 3: user.UserService.GetEmployeeById:input_type -> user.GetEmployeeByIdRequest
-	26, // 4: user.UserService.GetEmployeeByEmail:input_type -> user.GetEmployeeByEmailRequest
-	23, // 5: user.UserService.GetEmployees:input_type -> user.GetEmployeesRequest
-	28, // 6: user.UserService.UpdateEmployee:input_type -> user.UpdateEmployeeRequest
-	0,  // 7: user.UserService.DeleteEmployee:input_type -> user.DeleteEmployeeRequest
-	9,  // 8: user.UserService.Login:input_type -> user.LoginRequest
-	7,  // 9: user.UserService.Logout:input_type -> user.LogoutRequest
-	4,  // 10: user.UserService.Refresh:input_type -> user.RefreshRequest
-	2,  // 11: user.UserService.ValidateAccessToken:input_type -> user.ValidateTokenRequest
-	2,  // 12: user.UserService.ValidateRefreshToken:input_type -> user.ValidateTokenRequest
-	11, // 13: user.UserService.RequestPasswordReset:input_type -> user.PasswordActionRequest
-	11, // 14: user.UserService.RequestInitialPasswordSet:input_type -> user.PasswordActionRequest
-	13, // 15: user.UserService.SetPasswordWithToken:input_type -> user.SetPasswordWithTokenRequest
-	16, // 16: user.UserService.CreateClientAccount:input_type -> user.CreateClientRequest
-	19, // 17: user.UserService.GetClients:input_type -> user.GetClientsRequest
-	21, // 18: user.UserService.UpdateClient:input_type -> user.UpdateClientRequest
-	15, // 19: user.UserService.CreateEmployeeAccount:input_type -> user.CreateEmployeeRequest
-	30, // 20: user.UserService.GetLoans:input_type -> user.GetLoansRequest
-	32, // 21: user.UserService.GetLoanByNumber:input_type -> user.GetLoanByNumberRequest
-	33, // 22: user.UserService.CreateLoanRequest:input_type -> user.CreateLoanRequestRequest
-	27, // 23: user.UserService.GetEmployeeById:output_type -> user.GetEmployeeResponse
-	27, // 24: user.UserService.GetEmployeeByEmail:output_type -> user.GetEmployeeResponse
-	24, // 25: user.UserService.GetEmployees:output_type -> user.GetEmployeesResponse
-	27, // 26: user.UserService.UpdateEmployee:output_type -> user.GetEmployeeResponse
-	1,  // 27: user.UserService.DeleteEmployee:output_type -> user.DeleteEmployeeResponse
-	10, // 28: user.UserService.Login:output_type -> user.LoginResponse
-	8,  // 29: user.UserService.Logout:output_type -> user.LogoutResponse
-	5,  // 30: user.UserService.Refresh:output_type -> user.RefreshResponse
-	3,  // 31: user.UserService.ValidateAccessToken:output_type -> user.ValidateTokenResponse
-	3,  // 32: user.UserService.ValidateRefreshToken:output_type -> user.ValidateTokenResponse
-	12, // 33: user.UserService.RequestPasswordReset:output_type -> user.PasswordActionResponse
-	12, // 34: user.UserService.RequestInitialPasswordSet:output_type -> user.PasswordActionResponse
-	14, // 35: user.UserService.SetPasswordWithToken:output_type -> user.SetPasswordWithTokenResponse
-	17, // 36: user.UserService.CreateClientAccount:output_type -> user.CreateClientResponse
-	20, // 37: user.UserService.GetClients:output_type -> user.GetClientsResponse
-	22, // 38: user.UserService.UpdateClient:output_type -> user.UpdateClientResponse
-	27, // 39: user.UserService.CreateEmployeeAccount:output_type -> user.GetEmployeeResponse
-	31, // 40: user.UserService.GetLoans:output_type -> user.GetLoansResponse
-	29, // 41: user.UserService.GetLoanByNumber:output_type -> user.Loan
-	34, // 42: user.UserService.CreateLoanRequest:output_type -> user.CreateLoanRequestResponse
-	23, // [23:43] is the sub-list for method output_type
-	3,  // [3:23] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	29, // 1: user.GetEmployeesResponse.employees:type_name -> user.GetEmployeesResponse.Employee
+	25, // 2: user.UserService.GetEmployeeById:input_type -> user.GetEmployeeByIdRequest
+	26, // 3: user.UserService.GetEmployeeByEmail:input_type -> user.GetEmployeeByEmailRequest
+	23, // 4: user.UserService.GetEmployees:input_type -> user.GetEmployeesRequest
+	28, // 5: user.UserService.UpdateEmployee:input_type -> user.UpdateEmployeeRequest
+	0,  // 6: user.UserService.DeleteEmployee:input_type -> user.DeleteEmployeeRequest
+	9,  // 7: user.UserService.Login:input_type -> user.LoginRequest
+	7,  // 8: user.UserService.Logout:input_type -> user.LogoutRequest
+	4,  // 9: user.UserService.Refresh:input_type -> user.RefreshRequest
+	2,  // 10: user.UserService.ValidateAccessToken:input_type -> user.ValidateTokenRequest
+	2,  // 11: user.UserService.ValidateRefreshToken:input_type -> user.ValidateTokenRequest
+	11, // 12: user.UserService.RequestPasswordReset:input_type -> user.PasswordActionRequest
+	11, // 13: user.UserService.RequestInitialPasswordSet:input_type -> user.PasswordActionRequest
+	13, // 14: user.UserService.SetPasswordWithToken:input_type -> user.SetPasswordWithTokenRequest
+	16, // 15: user.UserService.CreateClientAccount:input_type -> user.CreateClientRequest
+	19, // 16: user.UserService.GetClients:input_type -> user.GetClientsRequest
+	21, // 17: user.UserService.UpdateClient:input_type -> user.UpdateClientRequest
+	15, // 18: user.UserService.CreateEmployeeAccount:input_type -> user.CreateEmployeeRequest
+	27, // 19: user.UserService.GetEmployeeById:output_type -> user.GetEmployeeResponse
+	27, // 20: user.UserService.GetEmployeeByEmail:output_type -> user.GetEmployeeResponse
+	24, // 21: user.UserService.GetEmployees:output_type -> user.GetEmployeesResponse
+	27, // 22: user.UserService.UpdateEmployee:output_type -> user.GetEmployeeResponse
+	1,  // 23: user.UserService.DeleteEmployee:output_type -> user.DeleteEmployeeResponse
+	10, // 24: user.UserService.Login:output_type -> user.LoginResponse
+	8,  // 25: user.UserService.Logout:output_type -> user.LogoutResponse
+	5,  // 26: user.UserService.Refresh:output_type -> user.RefreshResponse
+	3,  // 27: user.UserService.ValidateAccessToken:output_type -> user.ValidateTokenResponse
+	3,  // 28: user.UserService.ValidateRefreshToken:output_type -> user.ValidateTokenResponse
+	12, // 29: user.UserService.RequestPasswordReset:output_type -> user.PasswordActionResponse
+	12, // 30: user.UserService.RequestInitialPasswordSet:output_type -> user.PasswordActionResponse
+	14, // 31: user.UserService.SetPasswordWithToken:output_type -> user.SetPasswordWithTokenResponse
+	17, // 32: user.UserService.CreateClientAccount:output_type -> user.CreateClientResponse
+	20, // 33: user.UserService.GetClients:output_type -> user.GetClientsResponse
+	22, // 34: user.UserService.UpdateClient:output_type -> user.UpdateClientResponse
+	27, // 35: user.UserService.CreateEmployeeAccount:output_type -> user.GetEmployeeResponse
+	19, // [19:36] is the sub-list for method output_type
+	2,  // [2:19] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_user_user_proto_init() }
@@ -2710,7 +2222,7 @@ func file_user_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_user_proto_rawDesc), len(file_user_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   36,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

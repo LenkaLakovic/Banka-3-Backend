@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1117,4 +1118,193 @@ func (s *Server) CreateAccount(_ context.Context, req *bankpb.CreateAccountReque
 		AccountNumber: created.Number,
 		Error:         "",
 	}, nil
+}
+
+func parseLoanType(value string) (loan_type, error) {
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case "GOTOVINSKI":
+		return Cash, nil
+	case "STAMBENI":
+		return Mortgage, nil
+	case "AUTO":
+		return Car, nil
+	case "REFINANSIRAJUCI":
+		return Refinancing, nil
+	case "STUDENTSKI":
+		return Student, nil
+	default:
+		return "", status.Error(codes.InvalidArgument, "invalid loan_type")
+	}
+}
+
+func (s *Server) GetLoans(ctx context.Context, req *bankpb.GetLoansRequest) (*bankpb.GetLoansResponse, error) {
+	clientEmail := strings.TrimSpace(req.ClientEmail)
+	if clientEmail == "" {
+		return nil, status.Error(codes.Unauthenticated, "client email required")
+	}
+
+	loanType := ""
+	if strings.TrimSpace(req.LoanType) != "" {
+		parsedLoanType, err := parseLoanType(req.LoanType)
+		if err != nil {
+			return nil, err
+		}
+		loanType = string(parsedLoanType)
+	}
+
+	loanStatus := ""
+	if strings.TrimSpace(req.Status) != "" {
+		switch strings.ToLower(strings.TrimSpace(req.Status)) {
+		case "approved":
+			loanStatus = string(Approved)
+		case "rejected":
+			loanStatus = string(Rejected)
+		case "paid":
+			loanStatus = string(Paid)
+		case "late":
+			loanStatus = string(Late)
+		default:
+			return nil, status.Error(codes.InvalidArgument, "invalid status")
+		}
+	}
+
+	loans, err := s.getLoansForClient(
+		clientEmail,
+		loanType,
+		strings.TrimSpace(req.AccountNumber),
+		loanStatus,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to retrieve loans")
+	}
+
+	responseLoans := make([]*bankpb.Loan, 0, len(loans))
+	for _, loan := range loans {
+		responseLoans = append(responseLoans, &bankpb.Loan{
+			LoanNumber:            loan.LoanNumber,
+			LoanType:              loan.LoanType,
+			AccountNumber:         loan.AccountNumber,
+			LoanAmount:            loan.LoanAmount,
+			RepaymentPeriod:       loan.RepaymentPeriod,
+			NominalRate:           loan.NominalRate,
+			EffectiveRate:         loan.EffectiveRate,
+			AgreementDate:         loan.AgreementDate,
+			MaturityDate:          loan.MaturityDate,
+			NextInstallmentAmount: loan.NextInstallmentAmount,
+			NextInstallmentDate:   loan.NextInstallmentDate,
+			RemainingDebt:         loan.RemainingDebt,
+			Currency:              loan.Currency,
+			Status:                loan.Status,
+		})
+	}
+
+	return &bankpb.GetLoansResponse{
+		Loans: responseLoans,
+	}, nil
+}
+
+func (s *Server) GetLoanByNumber(ctx context.Context, req *bankpb.GetLoanByNumberRequest) (*bankpb.Loan, error) {
+	clientEmail := strings.TrimSpace(req.ClientEmail)
+	if clientEmail == "" {
+		return nil, status.Error(codes.Unauthenticated, "client email required")
+	}
+
+	loanNumber := strings.TrimSpace(req.LoanNumber)
+	if loanNumber == "" {
+		return nil, status.Error(codes.InvalidArgument, "loan number required")
+	}
+
+	loanID, err := strconv.ParseInt(loanNumber, 10, 64)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid loan number")
+	}
+
+	loan, err := s.getLoanByIDForClient(clientEmail, loanID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "loan not found")
+		}
+		return nil, status.Error(codes.Internal, "failed to retrieve loan")
+	}
+
+	return &bankpb.Loan{
+		LoanNumber:            loan.LoanNumber,
+		LoanType:              loan.LoanType,
+		AccountNumber:         loan.AccountNumber,
+		LoanAmount:            loan.LoanAmount,
+		RepaymentPeriod:       loan.RepaymentPeriod,
+		NominalRate:           loan.NominalRate,
+		EffectiveRate:         loan.EffectiveRate,
+		AgreementDate:         loan.AgreementDate,
+		MaturityDate:          loan.MaturityDate,
+		NextInstallmentAmount: loan.NextInstallmentAmount,
+		NextInstallmentDate:   loan.NextInstallmentDate,
+		RemainingDebt:         loan.RemainingDebt,
+		Currency:              loan.Currency,
+		Status:                loan.Status,
+	}, nil
+}
+
+func (s *Server) CreateLoanRequest(ctx context.Context, req *bankpb.CreateLoanRequestRequest) (*bankpb.CreateLoanRequestResponse, error) {
+	clientEmail := strings.TrimSpace(req.ClientEmail)
+	if clientEmail == "" {
+		return nil, status.Error(codes.Unauthenticated, "client email required")
+	}
+
+	accountNumber := strings.TrimSpace(req.AccountNumber)
+	currencyLabel := strings.TrimSpace(req.Currency)
+
+	if accountNumber == "" {
+		return nil, status.Error(codes.InvalidArgument, "account_number is required")
+	}
+	if currencyLabel == "" {
+		return nil, status.Error(codes.InvalidArgument, "currency is required")
+	}
+	if req.Amount <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "amount must be positive")
+	}
+	if req.RepaymentPeriod <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "repayment_period must be positive")
+	}
+
+	normalizedType, err := parseLoanType(req.LoanType)
+	if err != nil {
+		return nil, err
+	}
+
+	account, err := s.getOwnedAccountByNumber(clientEmail, accountNumber)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.NotFound, "account not found")
+		}
+		return nil, status.Error(codes.Internal, "failed to retrieve account")
+	}
+
+	if !strings.EqualFold(account.Currency, currencyLabel) {
+		return nil, status.Error(codes.InvalidArgument, "account currency and request currency must match")
+	}
+
+	currency, err := s.getCurrencyByLabel(currencyLabel)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.InvalidArgument, "unsupported currency")
+		}
+		return nil, status.Error(codes.Internal, "failed to retrieve currency")
+	}
+
+	loanRequest := &LoanRequest{
+		Type:             normalizedType,
+		Currency_id:      currency.Id,
+		Amount:           req.Amount,
+		Repayment_period: int64(req.RepaymentPeriod),
+		Account_id:       account.Id,
+		Status:           LoanRequestPending,
+		Submission_date:  time.Now(),
+	}
+
+	if err := s.createLoanRequest(loanRequest); err != nil {
+		return nil, status.Error(codes.Internal, "failed to create loan request")
+	}
+
+	return &bankpb.CreateLoanRequestResponse{}, nil
 }

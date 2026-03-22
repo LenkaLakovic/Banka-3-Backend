@@ -2265,6 +2265,438 @@ func (x *CreateAccountResponse) GetError() string {
 	return ""
 }
 
+type Loan struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	LoanNumber            string                 `protobuf:"bytes,1,opt,name=loan_number,json=loanNumber,proto3" json:"loan_number,omitempty"`
+	LoanType              string                 `protobuf:"bytes,2,opt,name=loan_type,json=loanType,proto3" json:"loan_type,omitempty"`
+	AccountNumber         string                 `protobuf:"bytes,3,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
+	LoanAmount            float64                `protobuf:"fixed64,4,opt,name=loan_amount,json=loanAmount,proto3" json:"loan_amount,omitempty"`
+	RepaymentPeriod       int32                  `protobuf:"varint,5,opt,name=repayment_period,json=repaymentPeriod,proto3" json:"repayment_period,omitempty"`
+	NominalRate           float64                `protobuf:"fixed64,6,opt,name=nominal_rate,json=nominalRate,proto3" json:"nominal_rate,omitempty"`
+	EffectiveRate         float64                `protobuf:"fixed64,7,opt,name=effective_rate,json=effectiveRate,proto3" json:"effective_rate,omitempty"`
+	AgreementDate         string                 `protobuf:"bytes,8,opt,name=agreement_date,json=agreementDate,proto3" json:"agreement_date,omitempty"`
+	MaturityDate          string                 `protobuf:"bytes,9,opt,name=maturity_date,json=maturityDate,proto3" json:"maturity_date,omitempty"`
+	NextInstallmentAmount float64                `protobuf:"fixed64,10,opt,name=next_installment_amount,json=nextInstallmentAmount,proto3" json:"next_installment_amount,omitempty"`
+	NextInstallmentDate   string                 `protobuf:"bytes,11,opt,name=next_installment_date,json=nextInstallmentDate,proto3" json:"next_installment_date,omitempty"`
+	RemainingDebt         float64                `protobuf:"fixed64,12,opt,name=remaining_debt,json=remainingDebt,proto3" json:"remaining_debt,omitempty"`
+	Currency              string                 `protobuf:"bytes,13,opt,name=currency,proto3" json:"currency,omitempty"`
+	Status                string                 `protobuf:"bytes,14,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *Loan) Reset() {
+	*x = Loan{}
+	mi := &file_bank_bank_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Loan) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Loan) ProtoMessage() {}
+
+func (x *Loan) ProtoReflect() protoreflect.Message {
+	mi := &file_bank_bank_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Loan.ProtoReflect.Descriptor instead.
+func (*Loan) Descriptor() ([]byte, []int) {
+	return file_bank_bank_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *Loan) GetLoanNumber() string {
+	if x != nil {
+		return x.LoanNumber
+	}
+	return ""
+}
+
+func (x *Loan) GetLoanType() string {
+	if x != nil {
+		return x.LoanType
+	}
+	return ""
+}
+
+func (x *Loan) GetAccountNumber() string {
+	if x != nil {
+		return x.AccountNumber
+	}
+	return ""
+}
+
+func (x *Loan) GetLoanAmount() float64 {
+	if x != nil {
+		return x.LoanAmount
+	}
+	return 0
+}
+
+func (x *Loan) GetRepaymentPeriod() int32 {
+	if x != nil {
+		return x.RepaymentPeriod
+	}
+	return 0
+}
+
+func (x *Loan) GetNominalRate() float64 {
+	if x != nil {
+		return x.NominalRate
+	}
+	return 0
+}
+
+func (x *Loan) GetEffectiveRate() float64 {
+	if x != nil {
+		return x.EffectiveRate
+	}
+	return 0
+}
+
+func (x *Loan) GetAgreementDate() string {
+	if x != nil {
+		return x.AgreementDate
+	}
+	return ""
+}
+
+func (x *Loan) GetMaturityDate() string {
+	if x != nil {
+		return x.MaturityDate
+	}
+	return ""
+}
+
+func (x *Loan) GetNextInstallmentAmount() float64 {
+	if x != nil {
+		return x.NextInstallmentAmount
+	}
+	return 0
+}
+
+func (x *Loan) GetNextInstallmentDate() string {
+	if x != nil {
+		return x.NextInstallmentDate
+	}
+	return ""
+}
+
+func (x *Loan) GetRemainingDebt() float64 {
+	if x != nil {
+		return x.RemainingDebt
+	}
+	return 0
+}
+
+func (x *Loan) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *Loan) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type GetLoansRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientEmail   string                 `protobuf:"bytes,1,opt,name=client_email,json=clientEmail,proto3" json:"client_email,omitempty"`
+	LoanType      string                 `protobuf:"bytes,2,opt,name=loan_type,json=loanType,proto3" json:"loan_type,omitempty"`
+	AccountNumber string                 `protobuf:"bytes,3,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLoansRequest) Reset() {
+	*x = GetLoansRequest{}
+	mi := &file_bank_bank_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLoansRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLoansRequest) ProtoMessage() {}
+
+func (x *GetLoansRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bank_bank_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLoansRequest.ProtoReflect.Descriptor instead.
+func (*GetLoansRequest) Descriptor() ([]byte, []int) {
+	return file_bank_bank_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *GetLoansRequest) GetClientEmail() string {
+	if x != nil {
+		return x.ClientEmail
+	}
+	return ""
+}
+
+func (x *GetLoansRequest) GetLoanType() string {
+	if x != nil {
+		return x.LoanType
+	}
+	return ""
+}
+
+func (x *GetLoansRequest) GetAccountNumber() string {
+	if x != nil {
+		return x.AccountNumber
+	}
+	return ""
+}
+
+func (x *GetLoansRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type GetLoansResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Loans         []*Loan                `protobuf:"bytes,1,rep,name=loans,proto3" json:"loans,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLoansResponse) Reset() {
+	*x = GetLoansResponse{}
+	mi := &file_bank_bank_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLoansResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLoansResponse) ProtoMessage() {}
+
+func (x *GetLoansResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bank_bank_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLoansResponse.ProtoReflect.Descriptor instead.
+func (*GetLoansResponse) Descriptor() ([]byte, []int) {
+	return file_bank_bank_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *GetLoansResponse) GetLoans() []*Loan {
+	if x != nil {
+		return x.Loans
+	}
+	return nil
+}
+
+type GetLoanByNumberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientEmail   string                 `protobuf:"bytes,1,opt,name=client_email,json=clientEmail,proto3" json:"client_email,omitempty"`
+	LoanNumber    string                 `protobuf:"bytes,2,opt,name=loan_number,json=loanNumber,proto3" json:"loan_number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetLoanByNumberRequest) Reset() {
+	*x = GetLoanByNumberRequest{}
+	mi := &file_bank_bank_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetLoanByNumberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLoanByNumberRequest) ProtoMessage() {}
+
+func (x *GetLoanByNumberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bank_bank_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLoanByNumberRequest.ProtoReflect.Descriptor instead.
+func (*GetLoanByNumberRequest) Descriptor() ([]byte, []int) {
+	return file_bank_bank_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *GetLoanByNumberRequest) GetClientEmail() string {
+	if x != nil {
+		return x.ClientEmail
+	}
+	return ""
+}
+
+func (x *GetLoanByNumberRequest) GetLoanNumber() string {
+	if x != nil {
+		return x.LoanNumber
+	}
+	return ""
+}
+
+type CreateLoanRequestRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ClientEmail     string                 `protobuf:"bytes,1,opt,name=client_email,json=clientEmail,proto3" json:"client_email,omitempty"`
+	AccountNumber   string                 `protobuf:"bytes,2,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
+	LoanType        string                 `protobuf:"bytes,3,opt,name=loan_type,json=loanType,proto3" json:"loan_type,omitempty"`
+	Amount          float64                `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty"`
+	RepaymentPeriod int32                  `protobuf:"varint,5,opt,name=repayment_period,json=repaymentPeriod,proto3" json:"repayment_period,omitempty"`
+	Currency        string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *CreateLoanRequestRequest) Reset() {
+	*x = CreateLoanRequestRequest{}
+	mi := &file_bank_bank_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLoanRequestRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLoanRequestRequest) ProtoMessage() {}
+
+func (x *CreateLoanRequestRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_bank_bank_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLoanRequestRequest.ProtoReflect.Descriptor instead.
+func (*CreateLoanRequestRequest) Descriptor() ([]byte, []int) {
+	return file_bank_bank_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *CreateLoanRequestRequest) GetClientEmail() string {
+	if x != nil {
+		return x.ClientEmail
+	}
+	return ""
+}
+
+func (x *CreateLoanRequestRequest) GetAccountNumber() string {
+	if x != nil {
+		return x.AccountNumber
+	}
+	return ""
+}
+
+func (x *CreateLoanRequestRequest) GetLoanType() string {
+	if x != nil {
+		return x.LoanType
+	}
+	return ""
+}
+
+func (x *CreateLoanRequestRequest) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+func (x *CreateLoanRequestRequest) GetRepaymentPeriod() int32 {
+	if x != nil {
+		return x.RepaymentPeriod
+	}
+	return 0
+}
+
+func (x *CreateLoanRequestRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+type CreateLoanRequestResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLoanRequestResponse) Reset() {
+	*x = CreateLoanRequestResponse{}
+	mi := &file_bank_bank_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLoanRequestResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLoanRequestResponse) ProtoMessage() {}
+
+func (x *CreateLoanRequestResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_bank_bank_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLoanRequestResponse.ProtoReflect.Descriptor instead.
+func (*CreateLoanRequestResponse) Descriptor() ([]byte, []int) {
+	return file_bank_bank_proto_rawDescGZIP(), []int{42}
+}
+
 var File_bank_bank_proto protoreflect.FileDescriptor
 
 const file_bank_bank_proto_rawDesc = "" +
@@ -2442,8 +2874,45 @@ const file_bank_bank_proto_rawDesc = "" +
 	"\x15CreateAccountResponse\x12\x14\n" +
 	"\x05Valid\x18\x01 \x01(\bR\x05Valid\x12$\n" +
 	"\rAccountNumber\x18\x02 \x01(\tR\rAccountNumber\x12\x14\n" +
-	"\x05Error\x18\x03 \x01(\tR\x05Error2\xd7\n" +
-	"\n" +
+	"\x05Error\x18\x03 \x01(\tR\x05Error\"\x94\x04\n" +
+	"\x04Loan\x12\x1f\n" +
+	"\vloan_number\x18\x01 \x01(\tR\n" +
+	"loanNumber\x12\x1b\n" +
+	"\tloan_type\x18\x02 \x01(\tR\bloanType\x12%\n" +
+	"\x0eaccount_number\x18\x03 \x01(\tR\raccountNumber\x12\x1f\n" +
+	"\vloan_amount\x18\x04 \x01(\x01R\n" +
+	"loanAmount\x12)\n" +
+	"\x10repayment_period\x18\x05 \x01(\x05R\x0frepaymentPeriod\x12!\n" +
+	"\fnominal_rate\x18\x06 \x01(\x01R\vnominalRate\x12%\n" +
+	"\x0eeffective_rate\x18\a \x01(\x01R\reffectiveRate\x12%\n" +
+	"\x0eagreement_date\x18\b \x01(\tR\ragreementDate\x12#\n" +
+	"\rmaturity_date\x18\t \x01(\tR\fmaturityDate\x126\n" +
+	"\x17next_installment_amount\x18\n" +
+	" \x01(\x01R\x15nextInstallmentAmount\x122\n" +
+	"\x15next_installment_date\x18\v \x01(\tR\x13nextInstallmentDate\x12%\n" +
+	"\x0eremaining_debt\x18\f \x01(\x01R\rremainingDebt\x12\x1a\n" +
+	"\bcurrency\x18\r \x01(\tR\bcurrency\x12\x16\n" +
+	"\x06status\x18\x0e \x01(\tR\x06status\"\x90\x01\n" +
+	"\x0fGetLoansRequest\x12!\n" +
+	"\fclient_email\x18\x01 \x01(\tR\vclientEmail\x12\x1b\n" +
+	"\tloan_type\x18\x02 \x01(\tR\bloanType\x12%\n" +
+	"\x0eaccount_number\x18\x03 \x01(\tR\raccountNumber\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\"4\n" +
+	"\x10GetLoansResponse\x12 \n" +
+	"\x05loans\x18\x01 \x03(\v2\n" +
+	".bank.LoanR\x05loans\"\\\n" +
+	"\x16GetLoanByNumberRequest\x12!\n" +
+	"\fclient_email\x18\x01 \x01(\tR\vclientEmail\x12\x1f\n" +
+	"\vloan_number\x18\x02 \x01(\tR\n" +
+	"loanNumber\"\xe0\x01\n" +
+	"\x18CreateLoanRequestRequest\x12!\n" +
+	"\fclient_email\x18\x01 \x01(\tR\vclientEmail\x12%\n" +
+	"\x0eaccount_number\x18\x02 \x01(\tR\raccountNumber\x12\x1b\n" +
+	"\tloan_type\x18\x03 \x01(\tR\bloanType\x12\x16\n" +
+	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12)\n" +
+	"\x10repayment_period\x18\x05 \x01(\x05R\x0frepaymentPeriod\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\"\x1b\n" +
+	"\x19CreateLoanRequestResponse2\xa5\f\n" +
 	"\vBankService\x12H\n" +
 	"\rCreateCompany\x12\x1a.bank.CreateCompanyRequest\x1a\x1b.bank.CreateCompanyResponse\x12K\n" +
 	"\x0eGetCompanyById\x12\x1b.bank.GetCompanyByIdRequest\x1a\x1c.bank.GetCompanyByIdResponse\x12E\n" +
@@ -2462,7 +2931,11 @@ const file_bank_bank_proto_rawDesc = "" +
 	"\x0fGetTransactions\x12\x1c.bank.GetTransactionsRequest\x1a\x1d.bank.GetTransactionsResponse\x12W\n" +
 	"\x12GetTransactionById\x12\x1f.bank.GetTransactionByIdRequest\x1a .bank.GetTransactionByIdResponse\x12c\n" +
 	"\x16GenerateTransactionPdf\x12#.bank.GenerateTransactionPdfRequest\x1a$.bank.GenerateTransactionPdfResponse\x12H\n" +
-	"\rCreateAccount\x12\x1a.bank.CreateAccountRequest\x1a\x1b.bank.CreateAccountResponseB1Z/github.com/RAF-SI-2025/Banka-3-Backend/gen/bankb\x06proto3"
+	"\rCreateAccount\x12\x1a.bank.CreateAccountRequest\x1a\x1b.bank.CreateAccountResponse\x129\n" +
+	"\bGetLoans\x12\x15.bank.GetLoansRequest\x1a\x16.bank.GetLoansResponse\x12;\n" +
+	"\x0fGetLoanByNumber\x12\x1c.bank.GetLoanByNumberRequest\x1a\n" +
+	".bank.Loan\x12T\n" +
+	"\x11CreateLoanRequest\x12\x1e.bank.CreateLoanRequestRequest\x1a\x1f.bank.CreateLoanRequestResponseB1Z/github.com/RAF-SI-2025/Banka-3-Backend/gen/bankb\x06proto3"
 
 var (
 	file_bank_bank_proto_rawDescOnce sync.Once
@@ -2476,7 +2949,7 @@ func file_bank_bank_proto_rawDescGZIP() []byte {
 	return file_bank_bank_proto_rawDescData
 }
 
-var file_bank_bank_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_bank_bank_proto_msgTypes = make([]protoimpl.MessageInfo, 43)
 var file_bank_bank_proto_goTypes = []any{
 	(*CreateCardRequest)(nil),              // 0: bank.CreateCardRequest
 	(*RequestCardRequest)(nil),             // 1: bank.RequestCardRequest
@@ -2515,6 +2988,12 @@ var file_bank_bank_proto_goTypes = []any{
 	(*GenerateTransactionPdfResponse)(nil), // 34: bank.GenerateTransactionPdfResponse
 	(*CreateAccountRequest)(nil),           // 35: bank.CreateAccountRequest
 	(*CreateAccountResponse)(nil),          // 36: bank.CreateAccountResponse
+	(*Loan)(nil),                           // 37: bank.Loan
+	(*GetLoansRequest)(nil),                // 38: bank.GetLoansRequest
+	(*GetLoansResponse)(nil),               // 39: bank.GetLoansResponse
+	(*GetLoanByNumberRequest)(nil),         // 40: bank.GetLoanByNumberRequest
+	(*CreateLoanRequestRequest)(nil),       // 41: bank.CreateLoanRequestRequest
+	(*CreateLoanRequestResponse)(nil),      // 42: bank.CreateLoanRequestResponse
 }
 var file_bank_bank_proto_depIdxs = []int32{
 	9,  // 0: bank.GetCardsResponse.cards:type_name -> bank.CardResponse
@@ -2527,45 +3006,52 @@ var file_bank_bank_proto_depIdxs = []int32{
 	10, // 7: bank.UpdateCompanyResponse.company:type_name -> bank.Company
 	28, // 8: bank.GetTransactionsResponse.transactions:type_name -> bank.Transaction
 	28, // 9: bank.GetTransactionByIdResponse.transaction:type_name -> bank.Transaction
-	11, // 10: bank.BankService.CreateCompany:input_type -> bank.CreateCompanyRequest
-	13, // 11: bank.BankService.GetCompanyById:input_type -> bank.GetCompanyByIdRequest
-	15, // 12: bank.BankService.GetCompanies:input_type -> bank.GetCompaniesRequest
-	26, // 13: bank.BankService.UpdateCompany:input_type -> bank.UpdateCompanyRequest
-	0,  // 14: bank.BankService.CreateCard:input_type -> bank.CreateCardRequest
-	1,  // 15: bank.BankService.RequestCard:input_type -> bank.RequestCardRequest
-	3,  // 16: bank.BankService.ConfirmCard:input_type -> bank.ConfirmCardRequest
-	5,  // 17: bank.BankService.GetCards:input_type -> bank.GetCardsRequest
-	7,  // 18: bank.BankService.BlockCard:input_type -> bank.BlockCardRequest
-	18, // 19: bank.BankService.GetPaymentRecipients:input_type -> bank.GetPaymentRecipientsRequest
-	20, // 20: bank.BankService.CreatePaymentRecipient:input_type -> bank.CreatePaymentRecipientRequest
-	22, // 21: bank.BankService.UpdatePaymentRecipient:input_type -> bank.UpdatePaymentRecipientRequest
-	24, // 22: bank.BankService.DeletePaymentRecipient:input_type -> bank.DeletePaymentRecipientRequest
-	29, // 23: bank.BankService.GetTransactions:input_type -> bank.GetTransactionsRequest
-	31, // 24: bank.BankService.GetTransactionById:input_type -> bank.GetTransactionByIdRequest
-	33, // 25: bank.BankService.GenerateTransactionPdf:input_type -> bank.GenerateTransactionPdfRequest
-	35, // 26: bank.BankService.CreateAccount:input_type -> bank.CreateAccountRequest
-	12, // 27: bank.BankService.CreateCompany:output_type -> bank.CreateCompanyResponse
-	14, // 28: bank.BankService.GetCompanyById:output_type -> bank.GetCompanyByIdResponse
-	16, // 29: bank.BankService.GetCompanies:output_type -> bank.GetCompaniesResponse
-	27, // 30: bank.BankService.UpdateCompany:output_type -> bank.UpdateCompanyResponse
-	9,  // 31: bank.BankService.CreateCard:output_type -> bank.CardResponse
-	2,  // 32: bank.BankService.RequestCard:output_type -> bank.RequestCardResponse
-	4,  // 33: bank.BankService.ConfirmCard:output_type -> bank.ConfirmCardResponse
-	6,  // 34: bank.BankService.GetCards:output_type -> bank.GetCardsResponse
-	8,  // 35: bank.BankService.BlockCard:output_type -> bank.BlockCardResponse
-	19, // 36: bank.BankService.GetPaymentRecipients:output_type -> bank.GetPaymentRecipientsResponse
-	21, // 37: bank.BankService.CreatePaymentRecipient:output_type -> bank.CreatePaymentRecipientResponse
-	23, // 38: bank.BankService.UpdatePaymentRecipient:output_type -> bank.UpdatePaymentRecipientResponse
-	25, // 39: bank.BankService.DeletePaymentRecipient:output_type -> bank.DeletePaymentRecipientResponse
-	30, // 40: bank.BankService.GetTransactions:output_type -> bank.GetTransactionsResponse
-	32, // 41: bank.BankService.GetTransactionById:output_type -> bank.GetTransactionByIdResponse
-	34, // 42: bank.BankService.GenerateTransactionPdf:output_type -> bank.GenerateTransactionPdfResponse
-	36, // 43: bank.BankService.CreateAccount:output_type -> bank.CreateAccountResponse
-	27, // [27:44] is the sub-list for method output_type
-	10, // [10:27] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	37, // 10: bank.GetLoansResponse.loans:type_name -> bank.Loan
+	11, // 11: bank.BankService.CreateCompany:input_type -> bank.CreateCompanyRequest
+	13, // 12: bank.BankService.GetCompanyById:input_type -> bank.GetCompanyByIdRequest
+	15, // 13: bank.BankService.GetCompanies:input_type -> bank.GetCompaniesRequest
+	26, // 14: bank.BankService.UpdateCompany:input_type -> bank.UpdateCompanyRequest
+	0,  // 15: bank.BankService.CreateCard:input_type -> bank.CreateCardRequest
+	1,  // 16: bank.BankService.RequestCard:input_type -> bank.RequestCardRequest
+	3,  // 17: bank.BankService.ConfirmCard:input_type -> bank.ConfirmCardRequest
+	5,  // 18: bank.BankService.GetCards:input_type -> bank.GetCardsRequest
+	7,  // 19: bank.BankService.BlockCard:input_type -> bank.BlockCardRequest
+	18, // 20: bank.BankService.GetPaymentRecipients:input_type -> bank.GetPaymentRecipientsRequest
+	20, // 21: bank.BankService.CreatePaymentRecipient:input_type -> bank.CreatePaymentRecipientRequest
+	22, // 22: bank.BankService.UpdatePaymentRecipient:input_type -> bank.UpdatePaymentRecipientRequest
+	24, // 23: bank.BankService.DeletePaymentRecipient:input_type -> bank.DeletePaymentRecipientRequest
+	29, // 24: bank.BankService.GetTransactions:input_type -> bank.GetTransactionsRequest
+	31, // 25: bank.BankService.GetTransactionById:input_type -> bank.GetTransactionByIdRequest
+	33, // 26: bank.BankService.GenerateTransactionPdf:input_type -> bank.GenerateTransactionPdfRequest
+	35, // 27: bank.BankService.CreateAccount:input_type -> bank.CreateAccountRequest
+	38, // 28: bank.BankService.GetLoans:input_type -> bank.GetLoansRequest
+	40, // 29: bank.BankService.GetLoanByNumber:input_type -> bank.GetLoanByNumberRequest
+	41, // 30: bank.BankService.CreateLoanRequest:input_type -> bank.CreateLoanRequestRequest
+	12, // 31: bank.BankService.CreateCompany:output_type -> bank.CreateCompanyResponse
+	14, // 32: bank.BankService.GetCompanyById:output_type -> bank.GetCompanyByIdResponse
+	16, // 33: bank.BankService.GetCompanies:output_type -> bank.GetCompaniesResponse
+	27, // 34: bank.BankService.UpdateCompany:output_type -> bank.UpdateCompanyResponse
+	9,  // 35: bank.BankService.CreateCard:output_type -> bank.CardResponse
+	2,  // 36: bank.BankService.RequestCard:output_type -> bank.RequestCardResponse
+	4,  // 37: bank.BankService.ConfirmCard:output_type -> bank.ConfirmCardResponse
+	6,  // 38: bank.BankService.GetCards:output_type -> bank.GetCardsResponse
+	8,  // 39: bank.BankService.BlockCard:output_type -> bank.BlockCardResponse
+	19, // 40: bank.BankService.GetPaymentRecipients:output_type -> bank.GetPaymentRecipientsResponse
+	21, // 41: bank.BankService.CreatePaymentRecipient:output_type -> bank.CreatePaymentRecipientResponse
+	23, // 42: bank.BankService.UpdatePaymentRecipient:output_type -> bank.UpdatePaymentRecipientResponse
+	25, // 43: bank.BankService.DeletePaymentRecipient:output_type -> bank.DeletePaymentRecipientResponse
+	30, // 44: bank.BankService.GetTransactions:output_type -> bank.GetTransactionsResponse
+	32, // 45: bank.BankService.GetTransactionById:output_type -> bank.GetTransactionByIdResponse
+	34, // 46: bank.BankService.GenerateTransactionPdf:output_type -> bank.GenerateTransactionPdfResponse
+	36, // 47: bank.BankService.CreateAccount:output_type -> bank.CreateAccountResponse
+	39, // 48: bank.BankService.GetLoans:output_type -> bank.GetLoansResponse
+	37, // 49: bank.BankService.GetLoanByNumber:output_type -> bank.Loan
+	42, // 50: bank.BankService.CreateLoanRequest:output_type -> bank.CreateLoanRequestResponse
+	31, // [31:51] is the sub-list for method output_type
+	11, // [11:31] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_bank_bank_proto_init() }
@@ -2579,7 +3065,7 @@ func file_bank_bank_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_bank_bank_proto_rawDesc), len(file_bank_bank_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   37,
+			NumMessages:   43,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
