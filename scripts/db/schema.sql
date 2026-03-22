@@ -129,12 +129,13 @@ CREATE TABLE IF NOT EXISTS companies (
 
 CREATE TYPE card_type AS ENUM ('debit', 'credit');
 CREATE TYPE card_status AS ENUM ('active', 'blocked', 'deactivated');
+CREATE TYPE card_brand AS ENUM ('visa', 'mastercard', 'amex', 'dinacard');
 
 CREATE TABLE IF NOT EXISTS cards (
     id              BIGSERIAL        PRIMARY KEY,
     number          VARCHAR(20)     NOT NULL,
     type            card_type       NOT NULL DEFAULT 'debit',
-    name            VARCHAR(127)    NOT NULL,
+    brand           card_brand       NOT NULL,
     creation_date   DATE            NOT NULL DEFAULT CURRENT_DATE,
     valid_until     DATE            NOT NULL,
     account_number  VARCHAR(20)     REFERENCES accounts(number) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -142,6 +143,17 @@ CREATE TABLE IF NOT EXISTS cards (
     card_limit      BIGINT,
     status          card_status     NOT NULL DEFAULT 'active',
     UNIQUE(number)
+);
+
+CREATE TABLE IF NOT EXISTS card_requests (
+    id              BIGSERIAL       PRIMARY KEY,
+    account_number  VARCHAR(20)     REFERENCES accounts(number) ON UPDATE CASCADE ON DELETE RESTRICT,
+    type            card_type       NOT NULL DEFAULT 'debit',
+    brand           card_brand      NOT NULL,
+    token           VARCHAR(255)    NOT NULL,
+    expiration_date DATE            NOT NULL,
+    complete        BOOLEAN         NOT NULL DEFAULT FALSE,
+    email           VARCHAR(255)    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS authorized_party (

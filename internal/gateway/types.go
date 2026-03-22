@@ -149,3 +149,17 @@ type transactionByIDURI struct {
 type transactionTypeQuery struct {
 	Type string `form:"type" binding:"required"`
 }
+
+type requestCardRequest struct {
+	AccountNumber string `json:"account_number" binding:"required"`
+	CardType      string `json:"card_type" binding:"required"`
+	CardBrand     string `json:"card_brand" binding:"required"`
+}
+
+type confirmCardQuery struct {
+	Token string `form:"token" binding:"required"`
+}
+
+type blockCardURI struct {
+	CardID int64 `uri:"id" binding:"required"`
+}

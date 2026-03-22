@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/metadata"
 
 	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	userpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/user"
@@ -71,6 +72,14 @@ func SetupApi(router *gin.Engine, server *Server) {
 	accounts := api.Group("/accounts")
 	{
 		accounts.POST("", server.CreateAccount)
+	}
+
+	cards := api.Group("/cards")
+	{
+		cards.GET("", AuthenticatedMiddleware(server.UserClient), server.GetCards)
+		cards.POST("/request", AuthenticatedMiddleware(server.UserClient), server.RequestCard)
+		cards.GET("/confirm", server.ConfirmCard)
+		cards.PATCH("/:id/block", AuthenticatedMiddleware(server.UserClient), server.BlockCard)
 	}
 }
 
@@ -621,6 +630,94 @@ func (s *Server) ConfirmPasswordReset(c *gin.Context) {
 	} else {
 		c.Status(http.StatusUnprocessableEntity)
 	}
+}
+
+func (s *Server) GetCards(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := s.BankClient.GetCards(ctx, &bankpb.GetCardsRequest{})
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.Cards)
+}
+
+func (s *Server) RequestCard(c *gin.Context) {
+	email, exists := c.Get("email")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user email not found in token"})
+		return
+	}
+
+	var req requestCardRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		writeBindError(c, err)
+		return
+	}
+
+	md := metadata.Pairs("user-email", email.(string))
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	resp, err := s.BankClient.RequestCard(ctx, &bankpb.RequestCardRequest{
+		AccountNumber: req.AccountNumber,
+		CardType:      req.CardType,
+		CardBrand:     req.CardBrand,
+	})
+
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusAccepted, resp)
+}
+
+func (s *Server) ConfirmCard(c *gin.Context) {
+	var query confirmCardQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		writeBindError(c, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	_, err := s.BankClient.ConfirmCard(ctx, &bankpb.ConfirmCardRequest{
+		Token: query.Token,
+	})
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+func (s *Server) BlockCard(c *gin.Context) {
+	var uri blockCardURI
+	if err := c.ShouldBindUri(&uri); err != nil {
+		c.String(http.StatusBadRequest, "card id is required and must be a valid integer")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	resp, err := s.BankClient.BlockCard(ctx, &bankpb.BlockCardRequest{
+		CardId: uri.CardID,
+	})
+	if err != nil {
+		writeGRPCError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func (s *Server) GetPaymentRecipients(c *gin.Context) {

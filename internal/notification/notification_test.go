@@ -107,3 +107,64 @@ func TestSendActivationEmail_Fail(t *testing.T) {
 		t.Errorf("expected Successful=false, got true")
 	}
 }
+func TestSendCardConfirmationEmail_Success(t *testing.T) {
+	createFakeTemplate("test-templates/card_confirmation.html", t)
+	defer cleanupTemplates(t)
+
+	mock := &MockSender{ShouldFail: false}
+	server := &Server{sender: mock}
+
+	req := &notification.CardConfirmationMailRequest{ToAddr: "test@test.com", Link: "http://test.link"}
+	resp, err := server.SendCardConfirmationEmail(context.Background(), req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !resp.Successful {
+		t.Fatalf("expected Successful=true, got false")
+	}
+}
+
+func TestSendCardConfirmationEmail_Fail(t *testing.T) {
+	createFakeTemplate("test-templates/card_confirmation.html", t)
+	defer cleanupTemplates(t)
+
+	mock := &MockSender{ShouldFail: true}
+	server := &Server{sender: mock}
+
+	req := &notification.CardConfirmationMailRequest{ToAddr: "test@test.com", Link: "http://test.link"}
+	resp, _ := server.SendCardConfirmationEmail(context.Background(), req)
+	if resp.Successful {
+		t.Fatalf("expected Successful=false, got true")
+	}
+}
+
+func TestSendCardCreatedEmail_Success(t *testing.T) {
+	createFakeTemplate("test-templates/card_created.html", t)
+	defer cleanupTemplates(t)
+
+	mock := &MockSender{ShouldFail: false}
+	server := &Server{sender: mock}
+
+	req := &notification.CardCreatedMailRequest{ToAddr: "test@test.com"}
+	resp, err := server.SendCardCreatedEmail(context.Background(), req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !resp.Successful {
+		t.Errorf("expected Successful=true, got false")
+	}
+}
+
+func TestSendCardCreatedEmail_Fail(t *testing.T) {
+	createFakeTemplate("test-templates/card_created.html", t)
+	defer cleanupTemplates(t)
+
+	mock := &MockSender{ShouldFail: true}
+	server := &Server{sender: mock}
+
+	req := &notification.CardCreatedMailRequest{ToAddr: "test@test.com"}
+	resp, _ := server.SendCardCreatedEmail(context.Background(), req)
+	if resp.Successful {
+		t.Errorf("expected Successful=false, got true")
+	}
+}
