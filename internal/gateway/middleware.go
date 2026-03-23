@@ -64,10 +64,12 @@ func TOTPMiddleware(totp userpb.TOTPServiceClient) gin.HandlerFunc {
 		key, keyPresent := c.Get("email")
 		if !keyPresent || key == "" {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 		email, ok := key.(string)
 		if !ok {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 		header := c.GetHeader("TOTP")
 		if header == "" {
@@ -80,6 +82,7 @@ func TOTPMiddleware(totp userpb.TOTPServiceClient) gin.HandlerFunc {
 		})
 		if err != nil || !resp.Valid {
 			c.AbortWithStatus(http.StatusUnauthorized)
+			return
 		}
 		c.Next()
 	}

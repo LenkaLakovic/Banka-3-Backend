@@ -1197,17 +1197,20 @@ func (s *Server) ConvertMoney(c *gin.Context) {
 func (s *Server) TOTPSetupBegin(c *gin.Context) {
 	key, keyPresent := c.Get("email")
 	if !keyPresent {
-		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user email not found in token"})
+		return
 	}
 	email, ok := key.(string)
 	if !ok {
-		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user email not found in token"})
+		return
 	}
 	resp, err := s.TOTPClient.EnrollBegin(context.Background(), &userpb.EnrollBeginRequest{
 		Email: email,
 	})
 	if err != nil {
 		writeGRPCError(c, err)
+		return
 	}
 	c.JSON(http.StatusAccepted, gin.H{
 		"url": resp.Url,
@@ -1222,11 +1225,13 @@ func (s *Server) TOTPSetupConfirm(c *gin.Context) {
 	}
 	key, keyPresent := c.Get("email")
 	if !keyPresent {
-		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user email not found in token"})
+		return
 	}
 	email, ok := key.(string)
 	if !ok {
-		c.Status(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user email not found in token"})
+		return
 	}
 	resp, err := s.TOTPClient.EnrollConfirm(context.Background(), &userpb.EnrollConfirmRequest{
 		Email: email,
@@ -1234,6 +1239,7 @@ func (s *Server) TOTPSetupConfirm(c *gin.Context) {
 	})
 	if err != nil {
 		writeGRPCError(c, err)
+		return
 	}
 	if resp.Success {
 		c.Status(200)
