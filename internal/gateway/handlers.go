@@ -71,7 +71,7 @@ func SetupApi(router *gin.Engine, server *Server) {
 		companies.PUT("/:id", server.UpdateCompany)
 	}
 
-	accounts := api.Group("/accounts")
+	accounts := api.Group("/accounts", AuthenticatedMiddleware(server.UserClient))
 	{
 		accounts.POST("", server.CreateAccount)
 		accounts.GET("", server.GetAccounts)
