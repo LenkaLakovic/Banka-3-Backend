@@ -2607,7 +2607,7 @@ func (*UpdateAccountLimitsResponse) Descriptor() ([]byte, []int) {
 
 type ListAccountsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FirstNmae     string                 `protobuf:"bytes,1,opt,name=firstNmae,proto3" json:"firstNmae,omitempty"`
+	FirstName     string                 `protobuf:"bytes,1,opt,name=firstName,proto3" json:"firstName,omitempty"`
 	LastName      string                 `protobuf:"bytes,2,opt,name=lastName,proto3" json:"lastName,omitempty"`
 	AccountNumber string                 `protobuf:"bytes,3,opt,name=account_number,json=accountNumber,proto3" json:"account_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -2644,9 +2644,9 @@ func (*ListAccountsRequest) Descriptor() ([]byte, []int) {
 	return file_bank_bank_proto_rawDescGZIP(), []int{42}
 }
 
-func (x *ListAccountsRequest) GetFirstNmae() string {
+func (x *ListAccountsRequest) GetFirstName() string {
 	if x != nil {
-		return x.FirstNmae
+		return x.FirstName
 	}
 	return ""
 }
@@ -3675,7 +3675,7 @@ const file_bank_bank_proto_rawDesc = "" +
 	"\x0e_monthly_limit\"\x1d\n" +
 	"\x1bUpdateAccountLimitsResponse\"v\n" +
 	"\x13ListAccountsRequest\x12\x1c\n" +
-	"\tfirstNmae\x18\x01 \x01(\tR\tfirstNmae\x12\x1a\n" +
+	"\tfirstName\x18\x01 \x01(\tR\tfirstName\x12\x1a\n" +
 	"\blastName\x18\x02 \x01(\tR\blastName\x12%\n" +
 	"\x0eaccount_number\x18\x03 \x01(\tR\raccountNumber\"A\n" +
 	"\x14ListAccountsResponse\x12)\n" +

@@ -74,7 +74,7 @@ func TestListAccounts(t *testing.T) {
 			WithArgs("Danilo%").
 			WillReturnRows(sqlmock.NewRows([]string{"number"}).AddRow("123"))
 
-		resp, err := server.ListAccounts(ctx, &bankpb.ListAccountsRequest{FirstNmae: "Danilo"})
+		resp, err := server.ListAccounts(ctx, &bankpb.ListAccountsRequest{FirstName: "Danilo"})
 		if err != nil || len(resp.Accounts) != 1 {
 			t.Fatalf("fail: %v", err)
 		}

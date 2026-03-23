@@ -299,7 +299,7 @@ message UpdateAccountLimitsRequest {
 message UpdateAccountLimitsResponse {}
 
 message ListAccountsRequest {
-  string firstNmae = 1;
+  string firstName = 1;
   string lastName = 2;
   string account_number = 3;
 }

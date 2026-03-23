@@ -30,7 +30,7 @@ func (s *Server) ListAccounts(ctx context.Context, req *bankpb.ListAccountsReque
 
 	empResp, err := userClient.GetEmployeeByEmail(ctx, &userpb.GetEmployeeByEmailRequest{Email: email})
 	if err == nil && empResp != nil {
-		accounts, err := s.GetAccountsForEmployee(req.FirstNmae, req.LastName, req.AccountNumber)
+		accounts, err := s.GetAccountsForEmployee(req.FirstName, req.LastName, req.AccountNumber)
 		if err != nil {
 			return nil, status.Error(codes.Internal, "failed to fetch accounts")
 		}
