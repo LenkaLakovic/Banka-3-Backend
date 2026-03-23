@@ -40,17 +40,18 @@ func TestConvertMoney(t *testing.T) {
 
 	ctx := context.Background()
 	now := time.Now()
+	future := now.Add(24 * time.Hour)
 
 	t.Run("Success_EUR_to_USD", func(t *testing.T) {
 		mock.ExpectQuery(`SELECT \* FROM "exchange_rates" WHERE currency_code = \$1 ORDER BY "exchange_rates"."currency_code" LIMIT \$2`).
 			WithArgs("EUR", 1).
-			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at"}).
-				AddRow("EUR", 117.0, now))
+			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at", "valid_until"}).
+				AddRow("EUR", 117.0, now, future))
 
 		mock.ExpectQuery(`SELECT \* FROM "exchange_rates" WHERE currency_code = \$1 ORDER BY "exchange_rates"."currency_code" LIMIT \$2`).
 			WithArgs("USD", 1).
-			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at"}).
-				AddRow("USD", 108.0, now))
+			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at", "valid_until"}).
+				AddRow("USD", 108.0, now, future))
 
 		resp, err := s.ConvertMoney(ctx, &exchangepb.ConversionRequest{
 			FromCurrency: "EUR",
@@ -67,8 +68,8 @@ func TestConvertMoney(t *testing.T) {
 	t.Run("Success_RSD_Base", func(t *testing.T) {
 		mock.ExpectQuery(`SELECT \* FROM "exchange_rates" WHERE currency_code = \$1 ORDER BY "exchange_rates"."currency_code" LIMIT \$2`).
 			WithArgs("EUR", 1).
-			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at"}).
-				AddRow("EUR", 117.0, now))
+			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at", "valid_until"}).
+				AddRow("EUR", 117.0, now, future))
 
 		resp, err := s.ConvertMoney(ctx, &exchangepb.ConversionRequest{
 			FromCurrency: "RSD",
@@ -88,15 +89,23 @@ func TestGetExchangeRates(t *testing.T) {
 	}(db)
 
 	now := time.Now()
+	future := now.Add(time.Hour)
 
-	t.Run("Success", func(t *testing.T) {
+	t.Run("Success_Valid_Rates", func(t *testing.T) {
 		mock.ExpectQuery(`SELECT \* FROM "exchange_rates"`).
-			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at"}).
-				AddRow("EUR", 117.0, now))
+			WillReturnRows(sqlmock.NewRows([]string{"currency_code", "rate_to_rsd", "updated_at", "valid_until"}).
+				AddRow("EUR", 117.0, now, future))
 
 		resp, err := s.GetExchangeRates(context.Background(), nil)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, resp.Rates)
+		foundRSD := false
+		for _, r := range resp.Rates {
+			if r.Code == "RSD" {
+				foundRSD = true
+			}
+		}
+		assert.True(t, foundRSD)
 	})
 }
 
@@ -106,14 +115,16 @@ func TestUpdateRatesRecord(t *testing.T) {
 		_ = db.Close()
 	}(db)
 
+	future := time.Now().Add(24 * time.Hour)
+
 	t.Run("Success", func(t *testing.T) {
 		mock.ExpectBegin()
 		mock.ExpectExec(`INSERT INTO "exchange_rates"`).
-			WithArgs("EUR", 117.0, sqlmock.AnyArg()).
+			WithArgs("EUR", 117.0, sqlmock.AnyArg(), future).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 		mock.ExpectCommit()
 
-		err := s.UpdateRatesRecord([]Rate{{CurrencyCode: "EUR", RateToRSD: 117.0}})
+		err := s.UpdateRatesRecord([]Rate{{CurrencyCode: "EUR", RateToRSD: 117.0, ValidUntil: future}})
 		assert.NoError(t, err)
 	})
 
@@ -123,7 +134,7 @@ func TestUpdateRatesRecord(t *testing.T) {
 			WillReturnError(fmt.Errorf("db error"))
 		mock.ExpectRollback()
 
-		err := s.UpdateRatesRecord([]Rate{{CurrencyCode: "EUR", RateToRSD: 117.0}})
+		err := s.UpdateRatesRecord([]Rate{{CurrencyCode: "EUR", RateToRSD: 117.0, ValidUntil: future}})
 		assert.Error(t, err)
 	})
 }

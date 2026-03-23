@@ -21,7 +21,7 @@ func (s *Server) GetRatesRecord() ([]Rate, error) {
 
 func (s *Server) GetRateByCodeRecord(code string) (*Rate, error) {
 	if code == "RSD" {
-		return &Rate{CurrencyCode: "RSD", RateToRSD: 1.0, UpdatedAt: time.Now()}, nil
+		return &Rate{CurrencyCode: "RSD", RateToRSD: 1.0, UpdatedAt: time.Now(), ValidUntil: time.Now().Add(24 * time.Hour)}, nil
 	}
 
 	var r Rate
@@ -41,7 +41,7 @@ func (s *Server) UpdateRatesRecord(rates []Rate) error {
 		for _, r := range rates {
 			err := tx.Clauses(clause.OnConflict{
 				Columns:   []clause.Column{{Name: "currency_code"}},
-				DoUpdates: clause.AssignmentColumns([]string{"rate_to_rsd", "updated_at"}),
+				DoUpdates: clause.AssignmentColumns([]string{"rate_to_rsd", "updated_at", "valid_until"}),
 			}).Create(&r).Error
 
 			if err != nil {
