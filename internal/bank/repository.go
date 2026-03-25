@@ -917,7 +917,7 @@ func (s *Server) ProcessPayment(from_account string, to_account string, start_am
 		return nil, fmt.Errorf("commit: %w", err)
 	}
 	return payment, nil
-	}
+}
 func (s *Server) CreateTransfer(fromAccount, toAccount string, amount int64) (*Transfer, error) {
 
 	if fromAccount == toAccount {
@@ -949,9 +949,9 @@ func (s *Server) CreateTransfer(fromAccount, toAccount string, amount int64) (*T
 	if fromAcc.Balance < amount {
 		return nil, errors.New("insufficient funds")
 	}
-	defer func() {
-		tx.Rollback()
-	}()
+	if err := tx.Rollback(); err != nil {
+		log.Println("rollback failed:", err)
+	}
 	row := tx.QueryRow(`
 		INSERT INTO transfers (
 			from_account,
@@ -989,7 +989,9 @@ func (s *Server) ConfirmTransfer(transferID int64, verificationCode string) erro
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	if err := tx.Rollback(); err != nil {
+		log.Println("rollback failed:", err)
+	}
 
 	var transfer Transfer
 
@@ -1072,7 +1074,11 @@ func (s *Server) GetTransferHistory(clientEmail string, page, pageSize int32) (*
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Println("rows close failed:", err)
+		}
+	}()
 
 	var history []*bankpb.TransferResponse
 
