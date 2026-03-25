@@ -62,7 +62,8 @@ func scanTransfer(scanner interface {
 		&exchangeRate,
 		&transfer.Commission,
 		&transfer.Status,
-		&transfer.Timestamp)
+		&transfer.Timestamp,
+	)
 	if err != nil {
 		log.Println("greska kod skeniranja transfera: ", err)
 		return nil, err
