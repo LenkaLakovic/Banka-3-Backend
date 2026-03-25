@@ -776,6 +776,60 @@ func (s *Server) updateLoanRequestStatus(id int64, newStatus loan_request_status
 	return s.db_gorm.Model(&LoanRequest{}).Where("id = ?", id).Update("status", newStatus).Error
 }
 
+func (s *Server) getExchangeRateToRSD(currencyLabel string) (float64, error) {
+	if currencyLabel == "RSD" {
+		return 1.0, nil
+	}
+	var rate ExchangeRate
+	if err := s.db_gorm.Where("currency_code = ?", currencyLabel).First(&rate).Error; err != nil {
+		return 0, err
+	}
+	return rate.Rate_to_rsd, nil
+}
+
+func (s *Server) getApprovedVariableLoans() ([]Loan, error) {
+	var loans []Loan
+	err := s.db_gorm.
+		Where("interest_rate_type = ? AND loan_status = ?", Variable, Approved).
+		Find(&loans).Error
+	return loans, err
+}
+
+func (s *Server) getLoansDueForCollection(today time.Time) ([]Loan, error) {
+	var loans []Loan
+	err := s.db_gorm.
+		Where("next_payment_due <= ? AND loan_status IN ?", today, []loan_status{Approved, Late}).
+		Find(&loans).Error
+	return loans, err
+}
+
+func (s *Server) countPaidInstallments(loanID int64) int {
+	var count int64
+	s.db_gorm.Model(&LoanInstallment{}).
+		Where("loan_id = ? AND status = ?", loanID, Installment_Paid).
+		Count(&count)
+	return int(count)
+}
+
+func (s *Server) getCurrencyLabelByID(id int64) (string, error) {
+	var currency Currency
+	if err := s.db_gorm.First(&currency, id).Error; err != nil {
+		return "", err
+	}
+	return currency.Label, nil
+}
+
+func (s *Server) getClientEmailByAccountID(accountID int64) (string, error) {
+	var email string
+	err := s.db_gorm.
+		Model(&Account{}).
+		Joins("JOIN clients ON clients.id = accounts.owner").
+		Where("accounts.id = ?", accountID).
+		Select("clients.email").
+		Scan(&email).Error
+	return email, err
+}
+
 func (s *Server) getAllLoans(loanType, accountNumber, loanStatus string) ([]loanView, error) {
 	var loans []loanView
 

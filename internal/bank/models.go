@@ -251,6 +251,13 @@ type (
 		Interest_rate_type interest_rate_type  `gorm:"column:interest_rate_type;type:interest_rate_type;default:'fixed'"`
 	}
 
+	ExchangeRate struct {
+		Currency_code string    `gorm:"column:currency_code;type:varchar(3);not null;primaryKey"`
+		Rate_to_rsd   float64  `gorm:"column:rate_to_rsd;type:decimal(20,10);not null"`
+		Updated_at    time.Time `gorm:"column:updated_at;not null;autoUpdateTime"`
+		Valid_until   time.Time `gorm:"column:valid_until;not null"`
+	}
+
 	VerificationCode struct {
 		Id             int64     `gorm:"column:id;type:bigserial;not null;primaryKey"`
 		Client_id      int64     `gorm:"column:client_id;type:bigint;references clients(id)"`
@@ -308,6 +315,10 @@ func (LoanRequest) TableName() string {
 
 func (VerificationCode) TableName() string {
 	return "verification_codes"
+}
+
+func (ExchangeRate) TableName() string {
+	return "exchange_rates"
 }
 
 func (CardRequest) TableName() string {

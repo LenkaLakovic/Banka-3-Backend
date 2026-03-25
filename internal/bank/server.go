@@ -1406,7 +1406,6 @@ func (s *Server) ApproveLoanRequest(_ context.Context, req *bankpb.ApproveLoanRe
 		return nil, status.Error(codes.InvalidArgument, "loan request is not pending")
 	}
 
-	// Fetch account for the loan
 	var account Account
 	if err := s.db_gorm.First(&account, loanReq.Account_id).Error; err != nil {
 		return nil, status.Error(codes.Internal, "failed to retrieve account")
@@ -1418,9 +1417,16 @@ func (s *Server) ApproveLoanRequest(_ context.Context, req *bankpb.ApproveLoanRe
 		return nil, status.Error(codes.Internal, "failed to retrieve currency")
 	}
 
+	// Calculate interest rate
+	rateToRSD, _ := s.getExchangeRateToRSD(currency.Label)
+	amountRSD := loanReq.Amount * rateToRSD
+	baseRate := BaseAnnualRate(amountRSD)
+	margin := MarginForLoanType(loanReq.Type)
+	annualRate := baseRate + margin
+
 	now := time.Now()
 	dateEnd := now.AddDate(0, int(loanReq.Repayment_period), 0)
-	monthlyPayment := loanReq.Amount / float64(loanReq.Repayment_period)
+	monthlyPayment := CalculateAnnuity(loanReq.Amount, annualRate, loanReq.Repayment_period)
 	nextPaymentDue := now.AddDate(0, 1, 0)
 
 	loan := &Loan{
@@ -1428,7 +1434,7 @@ func (s *Server) ApproveLoanRequest(_ context.Context, req *bankpb.ApproveLoanRe
 		Amount:             loanReq.Amount,
 		Currency_id:        loanReq.Currency_id,
 		Installments:       loanReq.Repayment_period,
-		Interest_rate:      0, // placeholder - #101 adds proper calculation
+		Interest_rate:      float32(annualRate),
 		Date_signed:        now,
 		Date_end:           dateEnd,
 		Monthly_payment:    monthlyPayment,
@@ -1441,7 +1447,7 @@ func (s *Server) ApproveLoanRequest(_ context.Context, req *bankpb.ApproveLoanRe
 
 	installment := &LoanInstallment{
 		Installment_amount: float32(monthlyPayment),
-		Interest_rate:      0,
+		Interest_rate:      float32(annualRate),
 		Currency_id:        loanReq.Currency_id,
 		Due_date:           nextPaymentDue,
 		Paid_date:          time.Time{},
