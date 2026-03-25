@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -72,6 +73,30 @@ func scanPayment(scanner interface {
 		return nil, err
 	}
 	return &payment, nil
+func scanTransfer(scanner interface {
+	Scan(dest ...any) error
+}) (*Transfer, error) {
+	var transfer Transfer
+	var exchangeRate sql.NullFloat64
+	err := scanner.Scan(
+		&transfer.Transaction_id,
+		&transfer.From_account,
+		&transfer.To_account,
+		&transfer.Start_amount,
+		&transfer.End_amount,
+		&transfer.Start_currency_id,
+		&exchangeRate,
+		&transfer.Commission,
+		&transfer.Status,
+		&transfer.Timestamp)
+	if err != nil {
+		log.Println("greska kod skeniranja transfera: ", err)
+		return nil, err
+	}
+	if exchangeRate.Valid {
+		transfer.Exchange_rate = exchangeRate.Float64
+	}
+	return &transfer, nil
 }
 
 func isUniqueViolation(err error) bool {
@@ -891,4 +916,190 @@ func (s *Server) ProcessPayment(from_account string, to_account string, start_am
 		return nil, fmt.Errorf("commit: %w", err)
 	}
 	return payment, nil
+func (s *Server) CreateTransfer(fromAccount, toAccount string, amount int64) (*Transfer, error) {
+
+	if fromAccount == toAccount {
+		return nil, errors.New("cannot transfer to same account")
+	}
+
+	fromAcc, err := s.GetAccountByNumberRecord(fromAccount)
+	if err != nil {
+		return nil, err
+	}
+
+	toAcc, err := s.GetAccountByNumberRecord(toAccount)
+	if err != nil {
+		return nil, err
+	}
+
+	if fromAcc.Currency != toAcc.Currency {
+		return nil, errors.New("currency mismatch")
+	}
+
+	currency, err := s.getCurrencyByLabel(fromAcc.Currency)
+	if err != nil {
+		return nil, err
+	}
+	tx, err := s.database.Begin()
+	if err != nil {
+		return nil, err
+	}
+	if fromAcc.Balance < amount {
+		return nil, errors.New("insufficient funds")
+	}
+	defer func() {
+		tx.Rollback()
+	}()
+	row := tx.QueryRow(`
+		INSERT INTO transfers (
+			from_account,
+			to_account,
+			start_amount,
+			end_amount,
+			start_currency_id,
+			exchange_rate,
+			commission,
+			status
+		)
+		VALUES ($1, $2, $3, $4, $5, NULL, 0, 'pending')
+		RETURNING transaction_id, from_account, to_account,
+		          start_amount, end_amount,
+		          start_currency_id, exchange_rate,
+		          commission, status, timestamp
+	`, fromAccount, toAccount, amount, amount, currency.Id)
+
+	transfer, err := scanTransfer(row)
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return transfer, nil
+}
+
+func (s *Server) ConfirmTransfer(transferID int64, verificationCode string) error {
+
+	if verificationCode == "" {
+		return errors.New("verification code required")
+	}
+
+	tx, err := s.database.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var transfer Transfer
+
+	err = tx.QueryRow(`
+		SELECT transaction_id, from_account, to_account, start_amount, status
+		FROM transfers
+		WHERE transaction_id = $1
+	`, transferID).Scan(
+		&transfer.Transaction_id,
+		&transfer.From_account,
+		&transfer.To_account,
+		&transfer.Start_amount,
+		&transfer.Status,
+	)
+	if err != nil {
+		return err
+	}
+
+	if transfer.Status != "pending" {
+		return errors.New("transfer already processed")
+	}
+
+	amount := transfer.Start_amount
+
+	// skini pare
+	res, err := tx.Exec(`
+		UPDATE accounts
+		SET balance = balance - $1
+		WHERE number = $2 AND balance >= $1
+	`, amount, transfer.From_account)
+	if err != nil {
+		return err
+	}
+
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return errors.New("insufficient funds")
+	}
+
+	// dodaj pare
+	_, err = tx.Exec(`
+		UPDATE accounts
+		SET balance = balance + $1
+		WHERE number = $2
+	`, amount, transfer.To_account)
+	if err != nil {
+		return err
+	}
+
+	// update status
+	_, err = tx.Exec(`
+		UPDATE transfers
+		SET status = 'completed'
+		WHERE transaction_id = $1
+	`, transfer.Transaction_id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (s *Server) GetTransferHistory(clientEmail string, page, pageSize int32) (*bankpb.TransferHistoryResponse, error) {
+
+	offset := (page - 1) * pageSize
+
+	rows, err := s.database.Query(`
+		SELECT t.transaction_id, t.from_account, t.to_account,
+		       t.start_amount, t.end_amount,
+		       t.start_currency_id, t.exchange_rate,
+		       t.commission, t.status, t.timestamp
+		FROM transfers t
+		JOIN accounts a ON t.from_account = a.number OR t.to_account = a.number
+		JOIN clients c ON a.owner = c.id
+		WHERE c.email = $1
+		ORDER BY t.timestamp DESC
+		LIMIT $2 OFFSET $3
+	`, clientEmail, pageSize, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var history []*bankpb.TransferResponse
+
+	for rows.Next() {
+		t, err := scanTransfer(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		history = append(history, &bankpb.TransferResponse{
+			FromAccount:     t.From_account,
+			ToAccount:       t.To_account,
+			InitialAmount:   t.Start_amount,
+			FinalAmount:     t.End_amount,
+			Fee:             t.Commission,
+			Currency:        "",
+			PaymentCode:     "",
+			ReferenceNumber: "",
+			Purpose:         "",
+			Status:          t.Status,
+			Timestamp:       t.Timestamp.String(),
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &bankpb.TransferHistoryResponse{
+		History: history,
+	}, nil
 }

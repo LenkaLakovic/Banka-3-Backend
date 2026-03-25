@@ -1343,4 +1343,81 @@ func (s *Server) PayoutMoneyToOtherAccount(
 		Status:          "realized",
 		Timestamp:       time.Now().Format("2006-01-02 15:04:05"), //standard layout of Go, don't change this date, it's layout, not hardcode
 	}, nil
+func (s *Server) TransferMoneyBetweenAccounts(
+	ctx context.Context,
+	req *bankpb.TransferRequest,
+) (*bankpb.TransferResponse, error) {
+
+	if strings.TrimSpace(req.FromAccount) == "" || strings.TrimSpace(req.ToAccount) == "" {
+		return nil, status.Error(codes.InvalidArgument, "account numbers are required")
+	}
+
+	if req.Amount <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "amount must be greater than zero")
+	}
+
+	transfer, err := s.CreateTransfer( req.FromAccount, req.ToAccount, int64(req.Amount))
+	if err != nil {
+		switch {
+		case strings.Contains(err.Error(), "same account"):
+			{
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		case strings.Contains(err.Error(), "currency mismatch"):
+			{
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		case strings.Contains(err.Error(), "insufficient funds"):
+			{
+				return nil, status.Error(codes.InvalidArgument, err.Error())
+			}
+		default:
+			{
+				return nil, status.Error(codes.Internal, "failed to create transfer")
+			}
+		}
+	}
+
+	err = s.ConfirmTransfer(transfer.Transaction_id, "123456")
+	if err != nil {
+		switch {
+		case strings.Contains(err.Error(), "insufficient funds"):
+			{
+				return nil, status.Error(codes.FailedPrecondition, "insufficient funds")
+			}
+		default:
+			{
+				return nil, status.Error(codes.Internal, "transfer confirmation failed")
+			}
+
+		}
+	}
+	res, err := &bankpb.TransferResponse{
+		FromAccount:     transfer.From_account,
+		ToAccount:       transfer.To_account,
+		InitialAmount:   transfer.Start_amount,
+		FinalAmount:     transfer.End_amount,
+		Fee:             transfer.Commission,
+		Currency:        strconv.FormatInt(transfer.Start_currency_id, 10),
+		PaymentCode:     "",
+		ReferenceNumber: "",
+		Purpose:         "",
+		Status:          "realized",
+		Timestamp:       fmt.Sprintf("%d", transfer.Timestamp.Unix()),
+	}, nil
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to transfer money")
+	}
+	return res, nil
+}
+
+func (s *Server) GetTransfersHistoryForUserEmail(
+	ctx context.Context,
+	req *bankpb.TransferHistoryRequest) (*bankpb.TransferHistoryResponse, error) {
+	res, err := s.GetTransferHistory(req.Email, req.Page, req.PageSize)
+	if err != nil {
+		status.Error(codes.Internal, "failed to get transfer history")
+		return &bankpb.TransferHistoryResponse{History: nil}, err
+	}
+	return res, nil
 }

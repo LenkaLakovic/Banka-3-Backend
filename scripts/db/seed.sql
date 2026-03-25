@@ -70,6 +70,10 @@ VALUES(
 INSERT INTO accounts (number, name, owner, balance, created_by, valid_until, currency, owner_type, account_type, maintainance_cost, daily_limit, monthly_limit, daily_expenditure, monthly_expenditure)
 VALUES('265000000000123456', 'Aleksa Nikolic', (SELECT id FROM clients WHERE email = 'aleksa@primer.raf'), 137,  (SELECT id FROM employees WHERE email = 'admin@banka.raf'), '2029-12-31', 'EUR', 'personal', 'checking', 11, 2718, 100000, 10, 100);
 
+INSERT INTO accounts (number, name, owner, balance, created_by, valid_until, currency, owner_type, account_type, maintainance_cost, daily_limit, monthly_limit, daily_expenditure, monthly_expenditure)
+VALUES(
+          '14159265358979323847', 'Arthur Dent', 1, 137, 1, '2029-12-31', 'EUR', 'personal', 'checking', 11, 2718, 100000, 10, 100);
+
 Insert into activity_codes (code, sector, branch) values('whateve', 'Sector for bullshiting', 'Socially unprodictive banking branch');
 
 Insert into companies(registered_id, name, tax_code, activity_code_id, address, owner_id) values(

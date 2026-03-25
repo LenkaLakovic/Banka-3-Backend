@@ -43,6 +43,7 @@ func SetupApi(router *gin.Engine, server *Server) {
 		transactions.GET("/:id/pdf", server.GenerateTransactionPDF)
 		transactions.POST("/payments", server.PayoutMoneyToOtherAccount)
 		transactions.POST("/transfers", server.TransferMoneyBetweenAccounts)
+		transactions.GET("/transfers/history", server.GetTransactionsHistoryForUserEmail)
 	}
 
 	passwordReset := api.Group("/password-reset")
@@ -724,13 +725,49 @@ func (s *Server) PayoutMoneyToOtherAccount(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
+
 func (s *Server) TransferMoneyBetweenAccounts(c *gin.Context) {
 	var req transferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeBindError(c, err)
 		return
 	}
-	c.Status(http.StatusNotImplemented)
+
+	if req.Amount <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "amount must be greater than zero"})
+		return
+	}
+
+	if req.FromAccount == req.ToAccount {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "sender and recipient account must not be the same account"})
+		return
+	}
+
+	res, err := s.BankClient.TransferMoneyBetweenAccounts(context.Background(), &bankpb.TransferRequest{
+		FromAccount: req.FromAccount,
+		ToAccount:   req.ToAccount,
+		Amount:      req.Amount,
+		Description: req.Description,
+	})
+
+	if err != nil {
+		st, ok := status.FromError(err)
+		if ok {
+			switch st.Code() {
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": st.Message()})
+			case codes.FailedPrecondition, codes.InvalidArgument:
+				c.JSON(http.StatusBadRequest, gin.H{"error": st.Message()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			}
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (s *Server) GetLoans(c *gin.Context) {
@@ -1257,4 +1294,24 @@ func (s *Server) ConvertMoney(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+func (s *Server) GetTransactionsHistoryForUserEmail(c *gin.Context) {
+	var params getTransfersHistoryQuery
+	if err := c.ShouldBindQuery(&params); err != nil {
+		writeBindError(c, err)
+		return
+	}
+	res, err := s.BankClient.GetTransfersHistoryForUserEmail(
+		c,
+		&bankpb.TransferHistoryRequest{
+			Email:    params.Email,
+			Page:     params.Page,
+			PageSize: params.PageSize,
+		},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, res)
 }
