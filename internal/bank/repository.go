@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	bankpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/bank"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -22,6 +23,10 @@ var ErrAccountOwnerNotFound = errors.New("account owner not found")
 var ErrAccountCreatorNotFound = errors.New("account creator not found")
 var ErrAccountCurrencyNotFound = errors.New("account currency not found")
 var ErrAccountNumberGenerationFailed = errors.New("account number generation failed")
+
+var ErrAccountNotFound = errors.New("account not found")
+var ErrInsufficientFunds = errors.New("insufficient funds")
+var ErrLimitExceeded = errors.New("limit exceeded")
 
 func scanCompany(scanner interface {
 	Scan(dest ...any) error
@@ -44,6 +49,56 @@ func scanCompany(scanner interface {
 		company.Activity_code_id = activityCodeID.Int64
 	}
 	return &company, nil
+}
+
+func scanPayment(scanner interface {
+	Scan(dest ...any) error
+}) (*Payment, error) {
+	var payment Payment
+	err := scanner.Scan(
+		&payment.Transaction_id,
+		&payment.From_account,
+		&payment.To_account,
+		&payment.Start_amount,
+		&payment.End_amount,
+		&payment.Commission,
+		&payment.Status,
+		&payment.Recipient_id,
+		&payment.Transaction_code,
+		&payment.Call_number,
+		&payment.Reason,
+		&payment.Timestamp,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &payment, nil
+}
+func scanTransfer(scanner interface {
+	Scan(dest ...any) error
+}) (*Transfer, error) {
+	var transfer Transfer
+	var exchangeRate sql.NullFloat64
+	err := scanner.Scan(
+		&transfer.Transaction_id,
+		&transfer.From_account,
+		&transfer.To_account,
+		&transfer.Start_amount,
+		&transfer.End_amount,
+		&transfer.Start_currency_id,
+		&exchangeRate,
+		&transfer.Commission,
+		&transfer.Status,
+		&transfer.Timestamp,
+	)
+	if err != nil {
+		log.Println("error when scanning transfer: ", err)
+		return nil, err
+	}
+	if exchangeRate.Valid {
+		transfer.Exchange_rate = exchangeRate.Float64
+	}
+	return &transfer, nil
 }
 
 func isUniqueViolation(err error) bool {
@@ -765,6 +820,364 @@ func (s *Server) getLoanByIDForClient(clientEmail string, loanID int64) (*loanVi
 
 func (s *Server) createLoanRequest(req *LoanRequest) error {
 	return s.db_gorm.Create(req).Error
+}
+
+func (s *Server) IncreaseAccountBalance(tx *sql.Tx, number string, amount int64) (*Account, error) {
+	res, err := tx.Exec(
+		"UPDATE accounts SET balance = balance + $1 WHERE number = $2",
+		amount, number,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("update failed: %w", err)
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if affected == 0 {
+		return nil, fmt.Errorf("account not found")
+	}
+	return s.GetAccountByNumberRecord(number)
+}
+
+func (s *Server) DecreaseAccountBalance(tx *sql.Tx, number string, amount int64) (*Account, error) {
+	//everything is in one query to make sure
+	//COALESCE in case expenditures are null, if so, use 0
+	res := tx.QueryRow(`
+		UPDATE accounts
+		SET
+			balance = balance - $2,
+			daily_expenditure = COALESCE(daily_expenditure, 0) + $2,
+			monthly_expenditure = COALESCE(monthly_expenditure, 0) + $2
+		WHERE
+			number = $1
+			AND balance >= $2
+			AND (COALESCE(daily_expenditure, 0) + $2) <= daily_limit
+			AND (COALESCE(monthly_expenditure, 0) + $2) <= monthly_limit
+		RETURNING number
+	`, number, amount)
+	//Did we get account from this query?
+	//If so, return it
+	var account string
+	err := res.Scan(&account)
+	if err == nil {
+		return s.GetAccountByNumberRecord(number)
+	}
+
+	if err != sql.ErrNoRows {
+		return nil, fmt.Errorf("update failed: %w", err)
+	}
+
+	//If error occurred, we need to diagnose it
+	//Running a query that will return data so we can check what conditions
+	//weren't met
+	var balance, dailyExp, monthlyExp, dailyLimit, monthlyLimit int64
+	err = tx.QueryRow(`
+		SELECT balance,
+		       COALESCE(daily_expenditure, 0),
+		       COALESCE(monthly_expenditure, 0),
+		       daily_limit,
+		       monthly_limit
+		FROM accounts
+		WHERE number = $1
+	`, number).Scan(&balance, &dailyExp, &monthlyExp, &dailyLimit, &monthlyLimit)
+
+	if err == sql.ErrNoRows {
+		return nil, ErrAccountNotFound
+	}
+
+	if balance < amount {
+		return nil, ErrInsufficientFunds
+	}
+
+	if dailyExp+amount > dailyLimit || monthlyExp+amount > monthlyLimit {
+		return nil, ErrLimitExceeded
+	}
+
+	return nil, fmt.Errorf("unknown failure")
+}
+func (s *Server) CreatePayment(tx *sql.Tx, from_account string, to_account string, start_amount int64,
+	end_amount int64, commission int64, transaction_code int64, call_number string,
+	reason string) (*Payment, error) {
+	recipient_id, err := s.getOwnerFromAccount(tx, to_account)
+	if err != nil {
+		return nil, fmt.Errorf("get owner from account failed: %w", err)
+	}
+	row := tx.QueryRow(`
+		INSERT INTO payments (
+			from_account, to_account, start_amount, end_amount,
+			commission,status, recipient_id, transcaction_code,
+			call_number, reason, timestamp
+		)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,CURRENT_TIMESTAMP)
+		RETURNING transaction_id, from_account, to_account,
+		          start_amount, end_amount, commission,status,
+		          recipient_id, transcaction_code,
+		          call_number, reason, timestamp
+	`,
+		from_account,
+		to_account,
+		start_amount,
+		end_amount,
+		commission,
+		"realized",
+		recipient_id,
+		transaction_code,
+		call_number,
+		reason,
+	)
+
+	payment, err := scanPayment(row)
+	if err != nil {
+		return nil, fmt.Errorf("scan payment: %w", err)
+	}
+
+	return payment, nil
+}
+
+func (s *Server) getOwnerFromAccount(tx *sql.Tx, account string) (int64, error) {
+	var ownerID int64
+
+	err := tx.QueryRow(
+		`SELECT owner FROM accounts WHERE number = $1`,
+		account,
+	).Scan(&ownerID)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, fmt.Errorf("account not found")
+		}
+		return 0, fmt.Errorf("query owner: %w", err)
+	}
+
+	return ownerID, nil
+}
+
+func (s *Server) ProcessPayment(from_account string, to_account string, start_amount int64,
+	end_amount int64, commission int64, transaction_code int64, call_number string,
+	reason string) (*Payment, error) {
+	tx, err := s.database.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("start tx: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	if _, err := s.DecreaseAccountBalance(tx, from_account, start_amount); err != nil {
+		return nil, err
+	}
+
+	if _, err := s.IncreaseAccountBalance(tx, to_account, start_amount); err != nil {
+		return nil, err
+	}
+
+	payment, err := s.CreatePayment(tx, from_account, to_account, start_amount, end_amount, commission, transaction_code, call_number, reason)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, fmt.Errorf("commit: %w", err)
+	}
+	return payment, nil
+}
+func (s *Server) CreateTransfer(fromAccount, toAccount string, amount int64) (*Transfer, error) {
+
+	if fromAccount == toAccount {
+		return nil, errors.New("cannot transfer to same account")
+	}
+	fromAcc, err := s.GetAccountByNumberRecord(fromAccount)
+	if err != nil {
+		return nil, err
+	}
+	toAcc, err := s.GetAccountByNumberRecord(toAccount)
+	if err != nil {
+		return nil, err
+	}
+	if fromAcc.Currency != toAcc.Currency {
+		return nil, errors.New("currency mismatch")
+	}
+	currency, err := s.getCurrencyByLabel(fromAcc.Currency)
+	if err != nil {
+		return nil, err
+	}
+	tx, err := s.database.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	if fromAcc.Balance < amount {
+		return nil, errors.New("insufficient funds")
+	}
+	row := tx.QueryRow(`
+    INSERT INTO transfers (
+        from_account,
+        to_account,
+        start_amount,
+        end_amount,
+        start_currency_id,
+        exchange_rate,
+        commission,
+        status
+    )
+    VALUES ($1, $2, $3, $4, $5, NULL, 0, 'pending')
+    RETURNING transaction_id, from_account, to_account,
+              start_amount, end_amount,
+              start_currency_id, exchange_rate,
+              commission, status, timestamp
+`, fromAccount, toAccount, amount, amount, currency.Id)
+	transfer, err := scanTransfer(row)
+	if err != nil {
+		log.Println("greska u skeniranju transfera")
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		log.Println("greska u komitovanju")
+		return nil, err
+	}
+	return transfer, nil
+}
+
+func (s *Server) ConfirmTransfer(transferID int64, verificationCode string) error {
+
+	if verificationCode == "" {
+		return errors.New("verification code required")
+	}
+
+	tx, err := s.database.Begin()
+	if err != nil {
+		log.Println("bank/server.go error when beginning transaction")
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+	var transfer Transfer
+
+	err = tx.QueryRow(`
+		SELECT transaction_id, from_account, to_account, start_amount, status
+		FROM transfers
+		WHERE transaction_id = $1
+	`, transferID).Scan(
+		&transfer.Transaction_id,
+		&transfer.From_account,
+		&transfer.To_account,
+		&transfer.Start_amount,
+		&transfer.Status,
+	)
+	if err != nil {
+		log.Println("bank/server.go error when executing query (ConfirmTransfer)")
+		return err
+	}
+
+	if transfer.Status != "pending" {
+		log.Println("bank/server.go transfer already processed (ConfirmTransfer)")
+		return errors.New("transfer already processed")
+	}
+
+	amount := transfer.Start_amount
+
+	// skini pare
+	res, err := tx.Exec(`
+		UPDATE accounts
+		SET balance = balance - $1
+		WHERE number = $2 AND balance >= $1
+	`, amount, transfer.From_account)
+	if err != nil {
+		return err
+	}
+
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		log.Println("bank/server.go insufficient funds (ConfirmTransfer)")
+		return errors.New("insufficient funds")
+	}
+
+	// dodaj pare
+	_, err = tx.Exec(`
+		UPDATE accounts
+		SET balance = balance + $1
+		WHERE number = $2
+	`, amount, transfer.To_account)
+	if err != nil {
+		log.Println("bank/server.go error when adding money (ConfirmTransfer)")
+		return err
+	}
+
+	// update status
+	_, err = tx.Exec(`
+		UPDATE transfers
+		SET status = 'completed'
+		WHERE transaction_id = $1
+	`, transfer.Transaction_id)
+	if err != nil {
+		log.Println("bank/server.go error when updating status (ConfirmTransfer)")
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (s *Server) GetTransferHistory(clientEmail string, page, pageSize int32) (*bankpb.TransferHistoryResponse, error) {
+
+	offset := (page - 1) * pageSize
+
+	rows, err := s.database.Query(`
+		SELECT t.transaction_id, t.from_account, t.to_account,
+		       t.start_amount, t.end_amount,
+		       t.start_currency_id, t.exchange_rate,
+		       t.commission, t.status, t.timestamp
+		FROM transfers t
+		JOIN accounts a ON t.from_account = a.number OR t.to_account = a.number
+		JOIN clients c ON a.owner = c.id
+		WHERE c.email = $1
+		ORDER BY t.timestamp DESC
+		LIMIT $2 OFFSET $3
+	`, clientEmail, pageSize, offset)
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Println("bank/server.go row close failed (GetTransferHistory)")
+			log.Println("rows close failed:", err)
+		}
+	}()
+
+	var history []*bankpb.TransferResponse
+
+	for rows.Next() {
+		t, err := scanTransfer(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		history = append(history, &bankpb.TransferResponse{
+			FromAccount:     t.From_account,
+			ToAccount:       t.To_account,
+			InitialAmount:   t.Start_amount,
+			FinalAmount:     t.End_amount,
+			Fee:             t.Commission,
+			Currency:        "",
+			PaymentCode:     "",
+			ReferenceNumber: "",
+			Purpose:         "",
+			Status:          t.Status,
+			Timestamp:       t.Timestamp.Format(time.RFC3339),
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("bank/server.go got some error in rows (GetTransferHistory)")
+		return nil, err
+	}
+
+	return &bankpb.TransferHistoryResponse{
+		History: history,
+	}, nil
 }
 
 type loanRequestView struct {

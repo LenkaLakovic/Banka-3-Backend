@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -831,15 +832,116 @@ func (s *Server) PayoutMoneyToOtherAccount(c *gin.Context) {
 		writeBindError(c, err)
 		return
 	}
-	c.Status(http.StatusNotImplemented)
+	println(c.Request)
+
+	paymentCodeParsed, err := strconv.ParseInt(req.PaymentCode, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid payment_code",
+		})
+		return
+	}
+	if req.Amount <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "amount must be greater than zero",
+		})
+		return
+	}
+
+	if req.SenderAccount == req.RecipientAccount {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "sender and recipient account must not be the same account",
+		})
+		return
+	}
+	res, err := s.BankClient.PayoutMoneyToOtherAccount(context.Background(), &bankpb.PaymentRequest{
+		SenderAccount:    req.SenderAccount,
+		RecipientAccount: req.RecipientAccount,
+		RecipientName:    req.RecipientName,
+		Amount:           req.Amount,
+		PaymentCode:      paymentCodeParsed,
+		ReferenceNumber:  req.ReferenceNumber,
+		Purpose:          req.Purpose,
+	})
+	if err != nil {
+		st, ok := status.FromError(err)
+		if ok {
+			switch st.Code() {
+
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{
+					"error": st.Message(),
+				})
+
+			case codes.FailedPrecondition:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": st.Message(),
+				})
+
+			case codes.InvalidArgument:
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": st.Message(),
+				})
+
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "internal server error",
+				})
+			}
+			return
+		}
+		// fallback if it's not a gRPC status error
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "unknown error",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }
+
 func (s *Server) TransferMoneyBetweenAccounts(c *gin.Context) {
 	var req transferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writeBindError(c, err)
 		return
 	}
-	c.Status(http.StatusNotImplemented)
+
+	if req.Amount <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "amount must be greater than zero"})
+		return
+	}
+
+	if req.FromAccount == req.ToAccount {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "sender and recipient account must not be the same account"})
+		return
+	}
+
+	res, err := s.BankClient.TransferMoneyBetweenAccounts(context.Background(), &bankpb.TransferRequest{
+		FromAccount: req.FromAccount,
+		ToAccount:   req.ToAccount,
+		Amount:      req.Amount,
+		Description: req.Description,
+	})
+
+	if err != nil {
+		st, ok := status.FromError(err)
+		if ok {
+			switch st.Code() {
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": st.Message()})
+			case codes.FailedPrecondition, codes.InvalidArgument:
+				c.JSON(http.StatusBadRequest, gin.H{"error": st.Message()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			}
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func accountResponse(a *bankpb.Account) gin.H {
@@ -1646,6 +1748,26 @@ func (s *Server) ConvertMoney(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+func (s *Server) GetTransactionsHistoryForUserEmail(c *gin.Context) {
+	var params getTransfersHistoryQuery
+	if err := c.ShouldBindQuery(&params); err != nil {
+		writeBindError(c, err)
+		return
+	}
+	res, err := s.BankClient.GetTransfersHistoryForUserEmail(
+		c,
+		&bankpb.TransferHistoryRequest{
+			Email:    params.Email,
+			Page:     params.Page,
+			PageSize: params.PageSize,
+		},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, res)
 }
 
 func (s *Server) TOTPSetupBegin(c *gin.Context) {

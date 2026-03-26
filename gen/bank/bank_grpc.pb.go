@@ -19,37 +19,38 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BankService_CreateCompany_FullMethodName                = "/bank.BankService/CreateCompany"
-	BankService_GetCompanyById_FullMethodName               = "/bank.BankService/GetCompanyById"
-	BankService_GetCompanies_FullMethodName                 = "/bank.BankService/GetCompanies"
-	BankService_UpdateCompany_FullMethodName                = "/bank.BankService/UpdateCompany"
-	BankService_CreateCard_FullMethodName                   = "/bank.BankService/CreateCard"
-	BankService_RequestCard_FullMethodName                  = "/bank.BankService/RequestCard"
-	BankService_ConfirmCard_FullMethodName                  = "/bank.BankService/ConfirmCard"
-	BankService_GetCards_FullMethodName                     = "/bank.BankService/GetCards"
-	BankService_BlockCard_FullMethodName                    = "/bank.BankService/BlockCard"
-	BankService_GetPaymentRecipients_FullMethodName         = "/bank.BankService/GetPaymentRecipients"
-	BankService_CreatePaymentRecipient_FullMethodName       = "/bank.BankService/CreatePaymentRecipient"
-	BankService_UpdatePaymentRecipient_FullMethodName       = "/bank.BankService/UpdatePaymentRecipient"
-	BankService_DeletePaymentRecipient_FullMethodName       = "/bank.BankService/DeletePaymentRecipient"
-	BankService_GetTransactions_FullMethodName              = "/bank.BankService/GetTransactions"
-	BankService_GetTransactionById_FullMethodName           = "/bank.BankService/GetTransactionById"
-	BankService_GenerateTransactionPdf_FullMethodName       = "/bank.BankService/GenerateTransactionPdf"
-	BankService_CreateAccount_FullMethodName                = "/bank.BankService/CreateAccount"
-	BankService_UpdateAccountName_FullMethodName            = "/bank.BankService/UpdateAccountName"
-	BankService_UpdateAccountLimits_FullMethodName          = "/bank.BankService/UpdateAccountLimits"
-	BankService_ListAccounts_FullMethodName                 = "/bank.BankService/ListAccounts"
-	BankService_GetAccountDetails_FullMethodName            = "/bank.BankService/GetAccountDetails"
-	BankService_ListClientTransactions_FullMethodName       = "/bank.BankService/ListClientTransactions"
-	BankService_GetLoans_FullMethodName                     = "/bank.BankService/GetLoans"
-	BankService_GetLoanByNumber_FullMethodName              = "/bank.BankService/GetLoanByNumber"
-	BankService_CreateLoanRequest_FullMethodName            = "/bank.BankService/CreateLoanRequest"
-	BankService_GetLoanRequests_FullMethodName              = "/bank.BankService/GetLoanRequests"
-	BankService_ApproveLoanRequest_FullMethodName           = "/bank.BankService/ApproveLoanRequest"
-	BankService_RejectLoanRequest_FullMethodName            = "/bank.BankService/RejectLoanRequest"
-	BankService_GetAllLoans_FullMethodName                  = "/bank.BankService/GetAllLoans"
-	BankService_TransferMoneyBetweenAccounts_FullMethodName = "/bank.BankService/TransferMoneyBetweenAccounts"
-	BankService_PayoutMoneyToOtherAccount_FullMethodName    = "/bank.BankService/PayoutMoneyToOtherAccount"
+	BankService_CreateCompany_FullMethodName                   = "/bank.BankService/CreateCompany"
+	BankService_GetCompanyById_FullMethodName                  = "/bank.BankService/GetCompanyById"
+	BankService_GetCompanies_FullMethodName                    = "/bank.BankService/GetCompanies"
+	BankService_UpdateCompany_FullMethodName                   = "/bank.BankService/UpdateCompany"
+	BankService_CreateCard_FullMethodName                      = "/bank.BankService/CreateCard"
+	BankService_RequestCard_FullMethodName                     = "/bank.BankService/RequestCard"
+	BankService_ConfirmCard_FullMethodName                     = "/bank.BankService/ConfirmCard"
+	BankService_GetCards_FullMethodName                        = "/bank.BankService/GetCards"
+	BankService_BlockCard_FullMethodName                       = "/bank.BankService/BlockCard"
+	BankService_GetPaymentRecipients_FullMethodName            = "/bank.BankService/GetPaymentRecipients"
+	BankService_CreatePaymentRecipient_FullMethodName          = "/bank.BankService/CreatePaymentRecipient"
+	BankService_UpdatePaymentRecipient_FullMethodName          = "/bank.BankService/UpdatePaymentRecipient"
+	BankService_DeletePaymentRecipient_FullMethodName          = "/bank.BankService/DeletePaymentRecipient"
+	BankService_GetTransactions_FullMethodName                 = "/bank.BankService/GetTransactions"
+	BankService_GetTransactionById_FullMethodName              = "/bank.BankService/GetTransactionById"
+	BankService_GenerateTransactionPdf_FullMethodName          = "/bank.BankService/GenerateTransactionPdf"
+	BankService_CreateAccount_FullMethodName                   = "/bank.BankService/CreateAccount"
+	BankService_UpdateAccountName_FullMethodName               = "/bank.BankService/UpdateAccountName"
+	BankService_UpdateAccountLimits_FullMethodName             = "/bank.BankService/UpdateAccountLimits"
+	BankService_ListAccounts_FullMethodName                    = "/bank.BankService/ListAccounts"
+	BankService_GetAccountDetails_FullMethodName               = "/bank.BankService/GetAccountDetails"
+	BankService_ListClientTransactions_FullMethodName          = "/bank.BankService/ListClientTransactions"
+	BankService_GetLoans_FullMethodName                        = "/bank.BankService/GetLoans"
+	BankService_GetLoanByNumber_FullMethodName                 = "/bank.BankService/GetLoanByNumber"
+	BankService_CreateLoanRequest_FullMethodName               = "/bank.BankService/CreateLoanRequest"
+	BankService_GetLoanRequests_FullMethodName                 = "/bank.BankService/GetLoanRequests"
+	BankService_ApproveLoanRequest_FullMethodName              = "/bank.BankService/ApproveLoanRequest"
+	BankService_RejectLoanRequest_FullMethodName               = "/bank.BankService/RejectLoanRequest"
+	BankService_GetAllLoans_FullMethodName                     = "/bank.BankService/GetAllLoans"
+	BankService_TransferMoneyBetweenAccounts_FullMethodName    = "/bank.BankService/TransferMoneyBetweenAccounts"
+	BankService_PayoutMoneyToOtherAccount_FullMethodName       = "/bank.BankService/PayoutMoneyToOtherAccount"
+	BankService_GetTransfersHistoryForUserEmail_FullMethodName = "/bank.BankService/GetTransfersHistoryForUserEmail"
 )
 
 // BankServiceClient is the client API for BankService service.
@@ -87,6 +88,7 @@ type BankServiceClient interface {
 	GetAllLoans(ctx context.Context, in *GetAllLoansRequest, opts ...grpc.CallOption) (*GetLoansResponse, error)
 	TransferMoneyBetweenAccounts(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error)
 	PayoutMoneyToOtherAccount(ctx context.Context, in *PaymentRequest, opts ...grpc.CallOption) (*PaymentResponse, error)
+	GetTransfersHistoryForUserEmail(ctx context.Context, in *TransferHistoryRequest, opts ...grpc.CallOption) (*TransferHistoryResponse, error)
 }
 
 type bankServiceClient struct {
@@ -407,6 +409,16 @@ func (c *bankServiceClient) PayoutMoneyToOtherAccount(ctx context.Context, in *P
 	return out, nil
 }
 
+func (c *bankServiceClient) GetTransfersHistoryForUserEmail(ctx context.Context, in *TransferHistoryRequest, opts ...grpc.CallOption) (*TransferHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TransferHistoryResponse)
+	err := c.cc.Invoke(ctx, BankService_GetTransfersHistoryForUserEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BankServiceServer is the server API for BankService service.
 // All implementations must embed UnimplementedBankServiceServer
 // for forward compatibility.
@@ -442,6 +454,7 @@ type BankServiceServer interface {
 	GetAllLoans(context.Context, *GetAllLoansRequest) (*GetLoansResponse, error)
 	TransferMoneyBetweenAccounts(context.Context, *TransferRequest) (*TransferResponse, error)
 	PayoutMoneyToOtherAccount(context.Context, *PaymentRequest) (*PaymentResponse, error)
+	GetTransfersHistoryForUserEmail(context.Context, *TransferHistoryRequest) (*TransferHistoryResponse, error)
 	mustEmbedUnimplementedBankServiceServer()
 }
 
@@ -544,6 +557,9 @@ func (UnimplementedBankServiceServer) TransferMoneyBetweenAccounts(context.Conte
 }
 func (UnimplementedBankServiceServer) PayoutMoneyToOtherAccount(context.Context, *PaymentRequest) (*PaymentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PayoutMoneyToOtherAccount not implemented")
+}
+func (UnimplementedBankServiceServer) GetTransfersHistoryForUserEmail(context.Context, *TransferHistoryRequest) (*TransferHistoryResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTransfersHistoryForUserEmail not implemented")
 }
 func (UnimplementedBankServiceServer) mustEmbedUnimplementedBankServiceServer() {}
 func (UnimplementedBankServiceServer) testEmbeddedByValue()                     {}
@@ -1124,6 +1140,24 @@ func _BankService_PayoutMoneyToOtherAccount_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BankService_GetTransfersHistoryForUserEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransferHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BankServiceServer).GetTransfersHistoryForUserEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BankService_GetTransfersHistoryForUserEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BankServiceServer).GetTransfersHistoryForUserEmail(ctx, req.(*TransferHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BankService_ServiceDesc is the grpc.ServiceDesc for BankService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1254,6 +1288,10 @@ var BankService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PayoutMoneyToOtherAccount",
 			Handler:    _BankService_PayoutMoneyToOtherAccount_Handler,
+		},
+		{
+			MethodName: "GetTransfersHistoryForUserEmail",
+			Handler:    _BankService_GetTransfersHistoryForUserEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

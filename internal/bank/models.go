@@ -200,6 +200,7 @@ type (
 		Exchange_rate     float64   `gorm:"column:exchange_rate;type:decimal(20,2)"`
 		Commission        int64     `gorm:"column:commission;type:bigint;not null"`
 		Timestamp         time.Time `gorm:"column:timestamp;not null;autoCreateTime"`
+		Status            string    `gorm:"column:status;type:varchar(20);not null"`
 	}
 
 	PaymentCode struct {

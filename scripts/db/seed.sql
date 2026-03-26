@@ -39,7 +39,18 @@ VALUES (
     '+381645555555', 'Njegoseva 25',
     '\xa514f71947f5447cdfc2845f40d020cea4146ba28e84cb1a82662a6286f8228d'::BYTEA,
     '\x11223344556677889900aabbccddeeff'::BYTEA
-)
+);
+--test client 2 (password: "password")
+INSERT INTO clients (
+first_name, last_name, date_of_birth, gender, email,
+phone_number, address, password, salt_password)
+   VALUES(
+       'Aleksa','Nikolic','1983-04-13','M','aleksa@primer.raf','+38161238472345','Novi Beograd 12',
+       '\x5f8c3b0b8c4c6c5f9d7a2a5f3d7c2d2e6a0c9c1b4b9f2e3a6d8e1f0a2b3c4d5e'::BYTEA,
+       '\x9f3a1c7e5b2d4a8c6e1f0923ab47cd11'::BYTEA
+    )
+
+
 ON CONFLICT (email) DO NOTHING;
 
 -- system client representing the bank itself (password: "BankaSystem1!")
