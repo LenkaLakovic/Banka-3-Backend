@@ -1411,34 +1411,35 @@ func (s *Server) PayoutMoneyToOtherAccount(
 	req *bankpb.PaymentRequest,
 ) (*bankpb.PaymentResponse, error) {
 
-	_, err := s.ProcessPayment(req.SenderAccount, req.RecipientAccount,
-		req.Amount, req.Amount, 0, req.PaymentCode,
-		req.ReferenceNumber, req.Purpose)
+	payment, currency, err := s.ProcessPayment(req.SenderAccount, req.RecipientAccount,
+		req.Amount, req.PaymentCode, req.ReferenceNumber, req.Purpose)
+
 	if err != nil {
+		log.Printf("bank/server.go: payment failed: %v", err)
 		switch {
 		case errors.Is(err, ErrAccountNotFound):
 			return nil, status.Error(codes.NotFound, "account not found")
 		case errors.Is(err, ErrInsufficientFunds):
 			return nil, status.Error(codes.FailedPrecondition, "insufficient funds")
-		case errors.Is(err, ErrLimitExceeded):
-			return nil, status.Error(codes.FailedPrecondition, "limit exceeded")
+		case strings.Contains(err.Error(), "exchange error"):
+			return nil, status.Error(codes.Unavailable, "exchange service unavailable")
 		default:
 			return nil, status.Error(codes.Internal, "internal error")
 		}
 	}
 
 	return &bankpb.PaymentResponse{
-		FromAccount:     req.SenderAccount,
-		ToAccount:       req.RecipientAccount,
-		InitialAmount:   req.Amount,
-		FinalAmount:     req.Amount,
-		Fee:             0,
-		Currency:        "EUR",
+		FromAccount:     payment.From_account,
+		ToAccount:       payment.To_account,
+		InitialAmount:   payment.Start_amount,
+		FinalAmount:     payment.End_amount,
+		Fee:             payment.Commission,
+		Currency:        strconv.FormatInt(currency.Id, 10),
 		PaymentCode:     req.PaymentCode,
 		ReferenceNumber: req.ReferenceNumber,
 		Purpose:         req.Purpose,
 		Status:          "realized",
-		Timestamp:       time.Now().Format("2006-01-02 15:04:05"), //standard layout of Go, don't change this date, it's layout, not hardcode
+		Timestamp:       time.Now().Format("2006-01-02 15:04:05"),
 	}, nil
 }
 

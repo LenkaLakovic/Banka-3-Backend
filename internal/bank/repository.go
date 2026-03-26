@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"math/big"
 	"strings"
 	"time"
@@ -956,34 +957,89 @@ func (s *Server) getOwnerFromAccount(tx *sql.Tx, account string) (int64, error) 
 	return ownerID, nil
 }
 
-func (s *Server) ProcessPayment(from_account string, to_account string, start_amount int64,
-	end_amount int64, commission int64, transaction_code int64, call_number string,
-	reason string) (*Payment, error) {
+func (s *Server) ProcessPayment(from_account string, to_account string, amount int64, transaction_code int64, call_number string, reason string) (*Payment, *Currency, error) {
+
+	fromAcc, err := s.GetAccountByNumberRecord(from_account)
+	if err != nil {
+		return nil, nil, ErrAccountNotFound
+	}
+	toAcc, err := s.GetAccountByNumberRecord(to_account)
+	if err != nil {
+		return nil, nil, ErrAccountNotFound
+	}
+
+	var finalAmount = amount
+	var commission int64 = 0
+
+	// 1. Logika konverzije
+	if fromAcc.Currency != toAcc.Currency {
+		ctx := context.Background()
+		// EUR -> RSD
+		resp1, err := s.callConvertMoney(ctx, fromAcc.Currency, "RSD", float64(amount))
+		if err != nil {
+			return nil, nil, fmt.Errorf("exchange error (hop 1): %v", err)
+		}
+		// RSD -> USD
+		resp2, err := s.callConvertMoney(ctx, "RSD", toAcc.Currency, resp1.ConvertedAmount)
+		if err != nil {
+			return nil, nil, fmt.Errorf("exchange error (hop 2): %v", err)
+		}
+
+		commission = int64(math.Round(float64(amount) * commission_rate))
+		finalAmount = int64(math.Round(resp2.ConvertedAmount))
+	}
+
 	tx, err := s.database.Begin()
 	if err != nil {
-		return nil, fmt.Errorf("start tx: %w", err)
+		return nil, nil, fmt.Errorf("start tx: %w", err)
 	}
-	defer func() {
-		_ = tx.Rollback()
-	}()
+	defer func() { _ = tx.Rollback() }()
 
-	if _, err := s.DecreaseAccountBalance(tx, from_account, start_amount); err != nil {
-		return nil, err
+	// 2. Ažuriranje balansa
+	if fromAcc.Currency != toAcc.Currency {
+		// Razlicita valuta:
+
+		systemEmail := "system@banka3.rs"
+		// A. Skini platiocu (Source)
+		if _, err := s.DecreaseAccountBalance(tx, from_account, amount); err != nil {
+			return nil, nil, err
+		}
+		// B. Dodaj banci (Source)
+		_, err = tx.Exec(`UPDATE accounts SET balance = balance + $1 WHERE currency = $2 AND owner = (SELECT id FROM clients WHERE email = $3)`,
+			amount, fromAcc.Currency, systemEmail)
+		// C. Skini banci (Target)
+		_, err = tx.Exec(`UPDATE accounts SET balance = balance - $1 WHERE currency = $2 AND owner = (SELECT id FROM clients WHERE email = $3)`,
+			finalAmount, toAcc.Currency, systemEmail)
+		// D. Dodaj primaocu (Target)
+		if _, err := s.IncreaseAccountBalance(tx, to_account, finalAmount); err != nil {
+			return nil, nil, err
+		}
+	} else {
+		// Ista valuta: Direktno
+		if _, err := s.DecreaseAccountBalance(tx, from_account, amount); err != nil {
+			return nil, nil, err
+		}
+		if _, err := s.IncreaseAccountBalance(tx, to_account, amount); err != nil {
+			return nil, nil, err
+		}
 	}
 
-	if _, err := s.IncreaseAccountBalance(tx, to_account, start_amount); err != nil {
-		return nil, err
-	}
-
-	payment, err := s.CreatePayment(tx, from_account, to_account, start_amount, end_amount, commission, transaction_code, call_number, reason)
+	// 3. Kreiraj zapis o plaćanju
+	payment, err := s.CreatePayment(tx, from_account, to_account, amount, finalAmount, commission, transaction_code, call_number, reason)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, fmt.Errorf("commit: %w", err)
+		return nil, nil, fmt.Errorf("commit: %w", err)
 	}
-	return payment, nil
+
+	currency, err := s.getCurrencyByLabel(fromAcc.Currency)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get currency id: %v", err)
+	}
+
+	return payment, currency, nil
 }
 
 func (s *Server) CreateTransfer(fromAccount, toAccount string, amount int64) (*Transfer, error) {
