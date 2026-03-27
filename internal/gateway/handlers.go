@@ -22,6 +22,9 @@ func SetupApi(router *gin.Engine, server *Server) {
 	router.GET("/healthz", server.Healthz)
 	router.Use(CORSMiddleware())
 	api := router.Group("/api")
+
+	secured := PermissionMiddleware(server.UserClient)
+
 	{
 		api.POST("/login", server.Login)
 		api.POST("/logout", AuthenticatedMiddleware(server.UserClient), server.Logout)
@@ -97,7 +100,7 @@ func SetupApi(router *gin.Engine, server *Server) {
 	{
 		loanRequests.POST("", server.CreateLoanRequest)
 		loanRequests.GET("", server.GetLoanRequests)
-		loanRequests.PATCH("/:id/approve", server.ApproveLoanRequest)
+		loanRequests.PATCH("/:id/approve", AuthenticatedMiddleware(server.UserClient), secured("manage_contracts"), server.ApproveLoanRequest)
 		loanRequests.PATCH("/:id/reject", server.RejectLoanRequest)
 	}
 
