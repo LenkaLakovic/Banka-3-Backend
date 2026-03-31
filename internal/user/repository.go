@@ -334,9 +334,35 @@ func updateUserRecord[T Client | Employee](user T, s *Server) (*T, error) {
 }
 
 var ErrUserNotFound = errors.New("user not found")
+var ErrTOTPAlreadyActive = errors.New("totp already active")
 
+<<<<<<< HEAD
 func (s *Server) SetTempTOTPSecret(id uint64, secret string) error {
 	_, err := s.database.Exec(`
+=======
+func (s *TOTPServer) getUserIdByEmail(email string) (*uint64, error) {
+	query := `
+		SELECT id FROM employees WHERE email = $1
+		UNION ALL
+		SELECT id FROM clients WHERE email = $1
+		LIMIT 1
+	`
+
+	var id uint64
+
+	err := s.db.QueryRow(query, email).Scan(&id)
+	if err == sql.ErrNoRows {
+		return nil, ErrUserNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
+
+func (s *TOTPServer) SetTempTOTPSecret(tx *sql.Tx, id uint64, secret string) error {
+	_, err := tx.Exec(`
+>>>>>>> 8b4b1f2 (totp status rpc, backup kodovi)
 		INSERT INTO verification_codes (client_id, temp_secret, temp_created_at)
 		VALUES ($1, $2, NOW())
 		ON CONFLICT (client_id)
@@ -394,16 +420,61 @@ func (s *Server) EnableTOTP(tx *sql.Tx, id uint64, tempSecret string) error {
 	return nil
 }
 
-func (s *Server) totpStatus(id uint64) (*bool, error) {
+func (s *TOTPServer) InsertGeneratedCodes(tx *sql.Tx, id uint64, codes []string) error {
+	query := "INSERT INTO backup_codes (client_id, token) VALUES"
+	values := []any{}
+	paramIdx := 1
+	for _, code := range codes {
+		query += fmt.Sprintf("($%d, $%d),", paramIdx, paramIdx+1)
+		paramIdx += 2
+		values = append(values, id, code)
+	}
+	query = query[:len(query)-1]
+	stmt, err := tx.Prepare(query)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(values...)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *TOTPServer) status(tx *sql.Tx, id uint64) (*bool, error) {
 	var active bool
-	row := s.database.QueryRow(`
+	query := `
 		SELECT enabled
 		FROM verification_codes
 		WHERE client_id = $1
-	`, id)
+		FOR UPDATE
+	`
+	row := tx.QueryRow(query, id)
 	err := row.Scan(&active)
 	if err != nil {
-		return nil, ErrUserNotFound
+		dummy := false
+		if errors.Is(err, sql.ErrNoRows) {
+			return &dummy, nil
+		}
+		return nil, err
 	}
 	return &active, nil
+}
+
+func (s *TOTPServer) tryBurnBackupCode(id uint64, code string) (*bool, error) {
+	query := `
+		UPDATE backup_codes
+		SET used = TRUE
+		WHERE client_id = $1 AND token = $2
+	`
+	res, err := s.db.Exec(query, id, code)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	ret := rows == 1
+	return &ret, nil
 }

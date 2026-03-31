@@ -264,6 +264,12 @@ CREATE TABLE IF NOT EXISTS verification_codes (
     temp_created_at TIMESTAMP   NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS backup_codes (
+    client_id BIGINT REFERENCES clients(id) ON DELETE CASCADE,
+    token     VARCHAR(6) NOT NULL,
+    used      BOOLEAN NOT NULL DEFAULT FALSE
+);
+
 CREATE TABLE IF NOT EXISTS exchange_rates (
     currency_code VARCHAR(3)     PRIMARY KEY,
     rate_to_rsd   DECIMAL(20, 6) NOT NULL,

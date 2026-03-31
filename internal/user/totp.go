@@ -2,8 +2,11 @@ package user
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"errors"
+	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/pquerna/otp/totp"
@@ -38,6 +41,15 @@ func (s *Server) VerifyCode(_ context.Context, req *userpb.VerifyCodeRequest) (*
 	if err != nil {
 		return nil, err
 	}
+	if !valid {
+		passed, err := s.tryBurnBackupCode(*userId, req.Code)
+		if err != nil {
+			return nil, err
+		}
+		return &userpb.VerifyCodeResponse{
+			Valid: *passed,
+		}, nil
+	}
 	return &userpb.VerifyCodeResponse{Valid: valid}, nil
 }
 func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) (*userpb.EnrollBeginResponse, error) {
@@ -48,6 +60,23 @@ func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) 
 		}
 		return nil, err
 	}
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	active, err := s.status(tx, *userId)
+	if err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
+		return nil, err
+	}
+	if *active {
+		return nil, status.Error(20, "totp already enabled")
+	}
+
 	key, err := totp.Generate(totp.GenerateOpts{
 		Issuer:      "Banka3",
 		AccountName: req.Email,
@@ -60,17 +89,35 @@ func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) 
 
 	secret := key.Secret()
 
-	err = s.SetTempTOTPSecret(userId, secret)
+	err = s.SetTempTOTPSecret(tx, *userId, secret)
 	if err != nil {
 		return nil, err
 	}
-
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
 	return &userpb.EnrollBeginResponse{
 		Url: key.URL(),
 	}, nil
 }
-func (s *Server) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmRequest) (*userpb.EnrollConfirmResponse, error) {
+
+func generateBackupCodes(num uint64) (*[]string, error) {
+	var codes []string
+	for _ = range num {
+		random, err := rand.Int(rand.Reader, big.NewInt(999999))
+		if err != nil {
+			return nil, err
+		}
+		code := fmt.Sprintf("%0*d", 6, random)
+		codes = append(codes, code)
+	}
+	return &codes, nil
+}
+
+func (s *TOTPServer) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmRequest) (*userpb.EnrollConfirmResponse, error) {
 	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
+	userId := client.Id
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -106,12 +153,54 @@ func (s *Server) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmReque
 		return nil, err
 	}
 
+	backupCodes, err := generateBackupCodes(5)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.InsertGeneratedCodes(tx, *userId, *backupCodes)
+	if err != nil {
+		return nil, err
+	}
 	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}
 	return &userpb.EnrollConfirmResponse{
-		Success: true,
+		Success:     true,
+		BackupCodes: *backupCodes,
+	}, nil
+}
+
+func (s *TOTPServer) Status(_ context.Context, req *userpb.StatusRequest) (*userpb.StatusResponse, error) {
+	userId, err := s.getUserIdByEmail(req.Email)
+	if err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, err
+	}
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	active, err := s.status(tx, *userId)
+	if err != nil {
+		if errors.Is(err, ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+	return &userpb.StatusResponse{
+		Active: *active,
 	}, nil
 }
 

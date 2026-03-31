@@ -38,7 +38,7 @@ func (s *Server) TOTPSetupConfirm(c *gin.Context) {
 		return
 	}
 	if resp.Success {
-		c.Status(200)
+		c.JSON(http.StatusOK, resp.BackupCodes)
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "wrong code",
