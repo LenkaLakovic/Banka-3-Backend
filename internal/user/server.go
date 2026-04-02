@@ -448,7 +448,7 @@ func (s *Server) SetPasswordWithToken(_ context.Context, req *userpb.SetPassword
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	email, _, err := s.ConsumePasswordActionToken(tx, hashValue(token))
+	email, _, err := consumePasswordActionToken(tx, hashValue(token))
 	if err != nil {
 		if errors.Is(err, ErrInvalidPasswordActionToken) {
 			return nil, status.Error(codes.InvalidArgument, "invalid or expired token")
@@ -509,7 +509,7 @@ func (s *Server) requestPasswordAction(ctx context.Context, email string, action
 	if actionType == passwordActionInitialSet {
 		baseURL = os.Getenv("PASSWORD_SET_BASE_URL")
 	}
-	link, err := buildPasswordLink(baseURL, token)
+	link, err := buildActionLink(baseURL, token)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "building password link failed")
 	}
@@ -580,7 +580,7 @@ func hashValue(value string) []byte {
 	return sum[:]
 }
 
-func buildPasswordLink(baseURL string, token string) (string, error) {
+func buildActionLink(baseURL string, token string) (string, error) {
 	if strings.TrimSpace(baseURL) == "" {
 		return "", fmt.Errorf("base URL is empty")
 	}

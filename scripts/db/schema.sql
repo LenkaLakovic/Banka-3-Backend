@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS password_action_tokens (
     created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
     used_at      TIMESTAMP,
     PRIMARY KEY (email, action_type),
-    CHECK (action_type IN ('reset', 'initial_set'))
+    CHECK (action_type IN ('reset', 'initial_set', 'totp_disable'))
 );
 
 CREATE TABLE IF NOT EXISTS currencies (

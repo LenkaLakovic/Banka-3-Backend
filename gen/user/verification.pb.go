@@ -424,7 +424,8 @@ func (x *DisableBeginResponse) GetSuccess() bool {
 
 type DisableConfirmRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -457,6 +458,13 @@ func (x *DisableConfirmRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use DisableConfirmRequest.ProtoReflect.Descriptor instead.
 func (*DisableConfirmRequest) Descriptor() ([]byte, []int) {
 	return file_user_verification_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DisableConfirmRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
 }
 
 func (x *DisableConfirmRequest) GetToken() string {
@@ -628,9 +636,10 @@ const file_user_verification_proto_rawDesc = "" +
 	"\x13DisableBeginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"0\n" +
 	"\x14DisableBeginResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"-\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"C\n" +
 	"\x15DisableConfirmRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\"2\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x14\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\"2\n" +
 	"\x16DisableConfirmResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"%\n" +
 	"\rStatusRequest\x12\x14\n" +

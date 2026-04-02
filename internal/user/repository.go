@@ -118,7 +118,7 @@ func (s *Server) InsertRefreshToken(token string) error {
 	return nil
 }
 
-func (s *Server) UpsertPasswordActionToken(email, actionType string, hashedToken []byte, validUntil time.Time) error {
+func upsertPasswordActionToken(db *sql.DB, email, actionType string, hashedToken []byte, validUntil time.Time) error {
 	query := `
 	INSERT INTO password_action_tokens (email, action_type, hashed_token, valid_until, used)
 	VALUES ($1, $2, $3, $4, FALSE)
@@ -130,14 +130,18 @@ func (s *Server) UpsertPasswordActionToken(email, actionType string, hashedToken
 		used_at = NULL
 	`
 
-	_, err := s.database.Exec(query, email, actionType, hashedToken, validUntil)
+	_, err := db.Exec(query, email, actionType, hashedToken, validUntil)
 	if err != nil {
 		return fmt.Errorf("upserting password action token: %w", err)
 	}
 	return nil
 }
 
-func (s *Server) ConsumePasswordActionToken(tx *sql.Tx, hashedToken []byte) (string, string, error) {
+func (s *Server) UpsertPasswordActionToken(email, actionType string, hashedToken []byte, validUntil time.Time) error {
+	return upsertPasswordActionToken(s.database, email, actionType, hashedToken, validUntil)
+}
+
+func consumePasswordActionToken(tx *sql.Tx, hashedToken []byte) (string, string, error) {
 	var email string
 	var actionType string
 	err := tx.QueryRow(`
@@ -420,11 +424,32 @@ func (s *Server) EnableTOTP(tx *sql.Tx, id uint64, tempSecret string) error {
 	return nil
 }
 
-func (s *TOTPServer) InsertGeneratedCodes(tx *sql.Tx, id uint64, codes []string) error {
+func (s *TOTPServer) DisableTOTP(tx *sql.Tx, id uint64) error {
+	_, err := tx.Exec(`
+		UPDATE verification_codes
+		SET enabled = FALSE,
+		WHERE client_id = $1
+	`, id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *TOTPServer) deleteOldCodes(tx *sql.Tx, id uint64) error {
 	_, err := tx.Exec(`
 		DELETE FROM backup_codes
 		WHERE client_id = $1
 	`, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *TOTPServer) InsertGeneratedCodes(tx *sql.Tx, id uint64, codes []string) error {
+	err := s.deleteOldCodes(tx, id)
 	if err != nil {
 		return err
 	}

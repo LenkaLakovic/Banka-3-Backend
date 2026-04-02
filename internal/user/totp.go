@@ -6,7 +6,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
+	"os"
 	"time"
 
 	"github.com/pquerna/otp/totp"
@@ -21,12 +23,22 @@ type TOTPServer struct {
 	userpb.UnimplementedTOTPServiceServer
 	db                  *sql.DB
 	notificationService notificationpb.NotificationServiceClient
+	totpDisableUrl      string
 }
 
+const (
+	totpDisableAction = "totp_disable"
+)
+
 func NewTotpServer(database *sql.DB, notif notificationpb.NotificationServiceClient) *TOTPServer {
+	baseURL := os.Getenv("TOTP_DISABLE_BASE_URL")
+	if baseURL == "" {
+		log.Fatalf("No url set for disabling TOTP!")
+	}
 	return &TOTPServer{
 		db:                  database,
 		notificationService: notif,
+		totpDisableUrl:      baseURL,
 	}
 }
 
@@ -219,25 +231,77 @@ func (s *TOTPServer) Status(_ context.Context, req *userpb.StatusRequest) (*user
 	}, nil
 }
 
-func (s *Server) TOTPStatus(_ context.Context, req *userpb.TOTPStatusRequest) (*userpb.TOTPStatusResponse, error) {
+func (s *TOTPServer) DisableBegin(ctx context.Context, req *userpb.DisableBeginRequest) (*userpb.DisableBeginResponse, error) {
+	email := req.Email
+
+	token, err := generateOpaqueToken()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "token generation failed")
+	}
+
+	validUntil := time.Now().Add(time.Hour)
+
+	if err := upsertPasswordActionToken(s.db, email, totpDisableAction, hashValue(token), validUntil); err != nil {
+		return nil, status.Error(codes.Internal, "storing token failed")
+	}
+
+	link, err := buildActionLink(s.totpDisableUrl, token)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "building password link failed")
+	}
+
+	resp, err := s.notificationService.SendTOTPDisableEmail(ctx, &notificationpb.SendTOTPDisableEmailRequest{
+		Email: email,
+		Link:  link,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &userpb.DisableBeginResponse{
+		Success: resp.Successful,
+	}, nil
+}
+
+func (s *TOTPServer) DisableConfirm(_ context.Context, req *userpb.DisableConfirmRequest) (*userpb.DisableConfirmResponse, error) {
 	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
+	userId := client.Id
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
 		}
 		return nil, err
 	}
-	userId := client.Id
-	active, err := s.totpStatus(userId)
+	tx, err := s.db.Begin()
 	if err != nil {
-		if errors.Is(err, ErrUserNotFound) || errors.Is(err, sql.ErrNoRows) {
-			return &userpb.TOTPStatusResponse{
-				Active: false,
-			}, nil
+		return nil, status.Error(codes.Internal, "starting transaction failed")
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	token := req.Token
+
+	_, _, err = consumePasswordActionToken(tx, hashValue(token))
+	if err != nil {
+		if errors.Is(err, ErrInvalidPasswordActionToken) {
+			return nil, status.Error(codes.InvalidArgument, "invalid or expired token")
 		}
+		return nil, status.Error(codes.Internal, "token validation failed")
+	}
+
+	err = s.deleteOldCodes(tx, *userId)
+	if err != nil {
 		return nil, err
 	}
-	return &userpb.TOTPStatusResponse{
-		Active: *active,
+
+	err = s.DisableTOTP(tx, *userId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, status.Error(codes.Internal, "committing transaction failed")
+	}
+
+	return &userpb.DisableConfirmResponse{
+		Success: true,
 	}, nil
 }
