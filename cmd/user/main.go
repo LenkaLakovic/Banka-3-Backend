@@ -88,7 +88,7 @@ func main() {
 
 	srv := grpc.NewServer()
 	user.RegisterUserServiceServer(srv, userService)
-	user.RegisterTOTPServiceServer(srv, userService)
+	user.RegisterTOTPServiceServer(srv, totpService)
 	reflection.Register(srv)
 
 	log.Printf("user service listening on :%s", port)

@@ -51,9 +51,7 @@ func (s *TOTPServer) VerifyCode(_ context.Context, req *userpb.VerifyCodeRequest
 		}
 		return nil, err
 	}
-	userId := client.Id
-
-	secret, err := s.GetSecret(userId)
+	secret, err := s.GetSecret(*userId)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.Unauthenticated, "user doesn't have TOTP set up")
@@ -79,8 +77,9 @@ func (s *TOTPServer) VerifyCode(_ context.Context, req *userpb.VerifyCodeRequest
 	}
 	return &userpb.VerifyCodeResponse{Valid: valid}, nil
 }
-func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) (*userpb.EnrollBeginResponse, error) {
+func (s *TOTPServer) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) (*userpb.EnrollBeginResponse, error) {
 	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
+	userId := client.id
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -108,7 +107,6 @@ func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) 
 		Issuer:      "Banka3",
 		AccountName: req.Email,
 	})
-	userId := client.Id
 
 	if err != nil {
 		return nil, err
@@ -151,15 +149,14 @@ func (s *TOTPServer) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmR
 		}
 		return nil, err
 	}
-	userId := client.Id
 
-	tx, err := s.database.Begin()
+	tx, err := s.db.Begin()
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	tempSecret, err := s.GetTempSecret(tx, userId)
+	tempSecret, err := s.GetTempSecret(tx, *userId)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -175,7 +172,7 @@ func (s *TOTPServer) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmR
 		}, nil
 	}
 
-	err = s.EnableTOTP(tx, userId, *tempSecret)
+	err = s.EnableTOTP(tx, *userId, *tempSecret)
 	if err != nil {
 		return nil, err
 	}

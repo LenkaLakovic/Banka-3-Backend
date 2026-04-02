@@ -226,16 +226,6 @@ func _TOTPService_DisableBegin_Handler(srv interface{}, ctx context.Context, dec
 		return nil, err
 	}
 	if interceptor == nil {
-<<<<<<< HEAD
-		return srv.(TOTPServiceServer).TOTPStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TOTPService_TOTPStatus_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TOTPServiceServer).TOTPStatus(ctx, req.(*TOTPStatusRequest))
-=======
 		return srv.(TOTPServiceServer).DisableBegin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
@@ -280,7 +270,6 @@ func _TOTPService_Status_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TOTPServiceServer).Status(ctx, req.(*StatusRequest))
->>>>>>> 8b4b1f2 (totp status rpc, backup kodovi)
 	}
 	return interceptor(ctx, in, info, handler)
 }
