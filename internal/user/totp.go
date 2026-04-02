@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Server) VerifyCode(_ context.Context, req *userpb.VerifyCodeRequest) (*userpb.VerifyCodeResponse, error) {
-	client, err := s.GetClientByEmail(req.Email)
+	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -41,7 +41,7 @@ func (s *Server) VerifyCode(_ context.Context, req *userpb.VerifyCodeRequest) (*
 	return &userpb.VerifyCodeResponse{Valid: valid}, nil
 }
 func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) (*userpb.EnrollBeginResponse, error) {
-	client, err := s.GetClientByEmail(req.Email)
+	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -70,7 +70,7 @@ func (s *Server) EnrollBegin(_ context.Context, req *userpb.EnrollBeginRequest) 
 	}, nil
 }
 func (s *Server) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmRequest) (*userpb.EnrollConfirmResponse, error) {
-	client, err := s.GetClientByEmail(req.Email)
+	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
@@ -116,7 +116,7 @@ func (s *Server) EnrollConfirm(_ context.Context, req *userpb.EnrollConfirmReque
 }
 
 func (s *Server) TOTPStatus(_ context.Context, req *userpb.TOTPStatusRequest) (*userpb.TOTPStatusResponse, error) {
-	client, err := s.GetClientByEmail(req.Email)
+	client, err := getUserByAttribute(Client{}, s, "email", req.Email)
 	if err != nil {
 		if errors.Is(err, ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, err.Error())
