@@ -80,6 +80,7 @@ services:
       PASSWORD_SET_BASE_URL: ${PASSWORD_SET_BASE_URL}
       REDIS_ADDR: "redis:6379"
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TOTP_DISABLE_BASE_URL: ${TOTP_DISABLE_BASE_URL}
     depends_on:
       postgres:
         condition: service_healthy

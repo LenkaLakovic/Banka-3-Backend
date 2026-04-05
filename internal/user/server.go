@@ -29,6 +29,13 @@ import (
 	userpb "github.com/RAF-SI-2025/Banka-3-Backend/gen/user"
 )
 
+type Connections struct {
+	NotificationClient notificationpb.NotificationServiceClient
+	Sql_db             *sql.DB
+	Gorm               *gorm.DB
+	Rdb                *redis.Client
+}
+
 const (
 	passwordActionReset      = "reset"
 	passwordActionInitialSet = "initial_set"
@@ -64,13 +71,13 @@ func HashPassword(password string, salt []byte) []byte {
 	return hashed.Sum(nil)
 }
 
-func NewServer(accessJwtSecret string, refreshJwtSecret string, database *sql.DB, gorm_db *gorm.DB, rdb *redis.Client) *Server {
+func NewServer(accessJwtSecret string, refreshJwtSecret string, conn *Connections) *Server {
 	return &Server{
 		accessJwtSecret:  accessJwtSecret,
 		refreshJwtSecret: refreshJwtSecret,
-		database:         database,
-		db_gorm:          gorm_db,
-		rdb:              rdb,
+		database:         conn.Sql_db,
+		db_gorm:          conn.Gorm,
+		rdb:              conn.Rdb,
 	}
 }
 
@@ -110,7 +117,7 @@ func (client Client) toProtobuff() *userpb.Client {
 }
 
 func (s *Server) GetEmployeeByEmail(_ context.Context, req *userpb.GetEmployeeByEmailRequest) (*userpb.GetEmployeeResponse, error) {
-	resp, err := getUserByAttribute(Employee{}, s, "email", req.Email)
+	resp, err := getUserByAttribute(Employee{}, s.db_gorm, "email", req.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, status.Error(codes.NotFound, "employee not found")
@@ -121,7 +128,7 @@ func (s *Server) GetEmployeeByEmail(_ context.Context, req *userpb.GetEmployeeBy
 }
 
 func (s *Server) GetEmployeeById(_ context.Context, req *userpb.GetEmployeeByIdRequest) (*userpb.GetEmployeeResponse, error) {
-	resp, err := getUserByAttribute(Employee{}, s, "id", req.Id)
+	resp, err := getUserByAttribute(Employee{}, s.db_gorm, "id", req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +446,7 @@ func (s *Server) Refresh(ctx context.Context, req *userpb.RefreshRequest) (*user
 // getRoleAndPermissions determines the role and permissions for a user by email.
 // Employees get role "employee" with their DB permissions; clients get role "client" with empty permissions.
 func (s *Server) getRoleAndPermissions(email string) (string, []string) {
-	emp, err := getUserByAttribute(Employee{}, s, "email", email)
+	emp, err := getUserByAttribute(Employee{}, s.db_gorm, "email", email)
 	if err == nil && emp != nil {
 		permissions := make([]string, len(emp.Permissions))
 		for i, v := range emp.Permissions {
@@ -462,7 +469,7 @@ func (s *Server) Login(ctx context.Context, req *userpb.LoginRequest) (*userpb.L
 
 		// Reject login for deactivated employees
 		if role == "employee" {
-			emp, empErr := getUserByAttribute(Employee{}, s, "email", user.email)
+			emp, empErr := getUserByAttribute(Employee{}, s.db_gorm, "email", user.email)
 			if empErr == nil && emp != nil && !emp.Active {
 				return nil, status.Error(codes.Unauthenticated, "account deactivated")
 			}
@@ -545,7 +552,7 @@ func (s *Server) SetPasswordWithToken(ctx context.Context, req *userpb.SetPasswo
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	email, _, err := s.ConsumePasswordActionToken(tx, hashValue(token))
+	email, _, err := consumePasswordActionToken(tx, hashValue(token))
 	if err != nil {
 		if errors.Is(err, ErrInvalidPasswordActionToken) {
 			return nil, status.Error(codes.InvalidArgument, "invalid or expired token")
@@ -608,7 +615,7 @@ func (s *Server) requestPasswordAction(ctx context.Context, email string, action
 	if actionType == passwordActionInitialSet {
 		baseURL = os.Getenv("PASSWORD_SET_BASE_URL")
 	}
-	link, err := buildPasswordLink(baseURL, token)
+	link, err := buildActionLink(baseURL, token)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "building password link failed")
 	}
@@ -679,7 +686,7 @@ func hashValue(value string) []byte {
 	return sum[:]
 }
 
-func buildPasswordLink(baseURL string, token string) (string, error) {
+func buildActionLink(baseURL string, token string) (string, error) {
 	if strings.TrimSpace(baseURL) == "" {
 		return "", fmt.Errorf("base URL is empty")
 	}

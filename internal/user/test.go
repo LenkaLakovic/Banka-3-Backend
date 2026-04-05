@@ -42,7 +42,14 @@ func newTestServer(t *testing.T) (*Server, sqlmock.Sqlmock, *sql.DB) {
 		t.Fatalf("sqlmock.New: %v", err)
 	}
 
-	return NewServer("access", "refresh", db, nil, nil), mock, db
+	conn := Connections{
+		Sql_db:             db,
+		Gorm:               nil,
+		NotificationClient: nil,
+		Rdb:                nil,
+	}
+
+	return NewServer("access", "refresh", &conn), mock, db
 }
 
 func newGormTestServer(t *testing.T) (*Server, sqlmock.Sqlmock, *sql.DB) {
@@ -60,5 +67,12 @@ func newGormTestServer(t *testing.T) (*Server, sqlmock.Sqlmock, *sql.DB) {
 		t.Fatalf("gorm.Open: %v", err)
 	}
 
-	return NewServer("access", "refresh", db, gormDB, nil), mock, db
+	conn := Connections{
+		Sql_db:             db,
+		Gorm:               gormDB,
+		NotificationClient: nil,
+		Rdb:                nil,
+	}
+
+	return NewServer("access", "refresh", &conn), mock, db
 }
