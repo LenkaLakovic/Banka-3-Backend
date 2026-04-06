@@ -1200,7 +1200,7 @@ func (s *Server) ConfirmTransfer(transferID int64, verificationCode string) erro
 		return err
 	}
 
-	if t.Status != "pending" {
+	if t.Status != pending {
 		return errors.New("transfer already processed")
 	}
 
