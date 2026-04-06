@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -9,8 +10,12 @@ import (
 )
 
 func setupCors(router *gin.Engine) {
+	origin := os.Getenv("CORS_ORIGIN")
+	if origin == "" {
+		origin = "http://localhost:5173"
+	}
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{origin},
 		AllowMethods:     []string{"GET, POST, PUT, PATCH, DELETE, OPTIONS"},
 		AllowHeaders:     []string{"Content-Type", "Authorization", "TOTP", "X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length", "X-Custom-Header"},
@@ -46,14 +51,14 @@ func SetupApi(router *gin.Engine, server *Server) {
 		recipients.DELETE("/:id", server.DeletePaymentRecipient)
 	}
 
-	transactions := api.Group("/transactions", auth)
+	transactions := api.Group("/transactions", auth, secured("role:client"))
 	{
 		transactions.GET("", server.GetTransactions)
 		transactions.GET("/:id", server.GetTransactionByID)
 		transactions.GET("/:id/pdf", server.GenerateTransactionPDF)
 
-		transactions.POST("/payment", secured("role:client"), totp, server.PayoutMoneyToOtherAccount)
-		transactions.POST("/transfer", secured("role:client"), totp, server.TransferMoneyBetweenAccounts)
+		transactions.POST("/payment", totp, server.PayoutMoneyToOtherAccount)
+		transactions.POST("/transfer", totp, server.TransferMoneyBetweenAccounts)
 	}
 
 	passwordReset := api.Group("/password-reset")
@@ -62,10 +67,10 @@ func SetupApi(router *gin.Engine, server *Server) {
 		passwordReset.POST("/confirm", server.ConfirmPasswordReset)
 	}
 
-	clients := api.Group("/clients", auth)
+	clients := api.Group("/clients", auth, secured("role:employee"))
 	{
-		clients.POST("", secured("role:employee"), server.CreateClientAccount)
-		clients.GET("", secured("role:employee"), server.GetClients)
+		clients.POST("", server.CreateClientAccount)
+		clients.GET("", server.GetClients)
 		clients.PUT("/:id", server.UpdateClient)
 	}
 
@@ -78,7 +83,7 @@ func SetupApi(router *gin.Engine, server *Server) {
 		employees.PATCH("/:employeeId", server.UpdateEmployee)
 	}
 
-	companies := api.Group("/companies", auth)
+	companies := api.Group("/companies", auth, secured("role:employee"))
 	{
 		companies.POST("", server.CreateCompany)
 		companies.GET("", server.GetCompanies)
@@ -89,13 +94,13 @@ func SetupApi(router *gin.Engine, server *Server) {
 	accounts := api.Group("/accounts", auth)
 	{
 		accounts.POST("", secured("role:employee"), server.CreateAccount)
-		accounts.GET("", server.GetAccounts)
-		accounts.GET("/:accountNumber", server.GetAccountByNumber)
-		accounts.PATCH("/:accountNumber/name", server.UpdateAccountName)
-		accounts.PATCH("/:accountNumber/limit", totp, server.UpdateAccountLimits)
+		accounts.GET("", secured("role:client|employee"), server.GetAccounts)
+		accounts.GET("/:accountNumber", secured("role:client|employee"), server.GetAccountByNumber)
+		accounts.PATCH("/:accountNumber/name", secured("role:client|employee"), server.UpdateAccountName)
+		accounts.PATCH("/:accountNumber/limit", secured("role:employee"), totp, server.UpdateAccountLimits)
 	}
 
-	loans := api.Group("/loans", auth)
+	loans := api.Group("/loans", auth, secured("role:client|employee"))
 	{
 		loans.GET("", server.GetLoans)
 		loans.GET("/:loanNumber", server.GetLoanByNumber)
@@ -104,24 +109,24 @@ func SetupApi(router *gin.Engine, server *Server) {
 	loanRequests := api.Group("/loan-requests", auth)
 	{
 		loanRequests.POST("", secured("role:client"), server.CreateLoanRequest)
-		loanRequests.GET("", server.GetLoanRequests)
+		loanRequests.GET("", secured("role:employee"), server.GetLoanRequests)
 		loanRequests.PATCH("/:id/approve", secured("role:employee", "manage_contracts"), server.ApproveLoanRequest)
 		loanRequests.PATCH("/:id/reject", secured("role:employee", "manage_contracts"), server.RejectLoanRequest)
 	}
 
 	cards := api.Group("/cards")
 	{
-		cards.GET("", auth, server.GetCards)
-		cards.POST("", auth, server.RequestCard)
-		cards.GET("/confirm", server.ConfirmCard)
-		cards.PATCH("/:cardNumber/block", auth, server.BlockCard)
+		cards.GET("", auth, secured("role:client"), server.GetCards)
+		cards.POST("", auth, secured("role:client"), server.RequestCard)
+		cards.GET("/confirm", auth, secured("role:client"), server.ConfirmCard)
+		cards.PATCH("/:cardNumber/block", auth, secured("role:client"), server.BlockCard)
 	}
 
-	api.GET("/exchange-rates", auth, server.GetExchangeRates)
+	api.GET("/exchange-rates", auth, secured("role:client"), server.GetExchangeRates)
 
 	exchange := api.Group("/exchange")
 	{
-		exchange.POST("/convert", auth, server.ConvertMoney)
+		exchange.POST("/convert", auth, secured("role:client"), server.ConvertMoney)
 	}
 }
 
