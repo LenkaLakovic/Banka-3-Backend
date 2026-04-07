@@ -52,15 +52,9 @@ build-l:
 	go build ./cmd/...
 
 test:
-	$(GO_RUN) go test -race ./...
-
-test-l:
-	go test -race ./...
-
-test-integration:
 	$(GO_RUN) go test -race -count=1 -tags=integration ./...
 
-test-integration-l:
+test-l:
 	go test -race -count=1 -tags=integration ./...
 
 fmt:
