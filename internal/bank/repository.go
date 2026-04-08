@@ -181,6 +181,24 @@ func (s *Server) GetCompanyByIDRecord(companyID int64) (*Company, error) {
 	return company, nil
 }
 
+func (s *Server) GetCompanyByTaxCode(taxCode int64) (*Company, error) {
+	row := s.database.QueryRow(`
+        SELECT id, registered_id, name, tax_code, activity_code_id, address, owner_id
+        FROM companies
+        WHERE tax_code = $1
+    `, taxCode)
+
+	company, err := scanCompany(row)
+	if err == sql.ErrNoRows {
+		return nil, ErrCompanyNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("getting company by tax code: %w", err)
+	}
+
+	return company, nil
+}
+
 func (s *Server) GetCompaniesRecords() ([]*Company, error) {
 	rows, err := s.database.Query(`
 		SELECT id, registered_id, name, tax_code, activity_code_id, address, owner_id

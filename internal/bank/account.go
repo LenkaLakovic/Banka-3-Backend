@@ -2,6 +2,7 @@ package bank
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -343,12 +344,52 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 		Maintainance_cost: 0,
 	}
 
+	// Logika za kompaniju - Izvršava se samo ako postoje podaci o firmi
 	if req.BusinessInfo != nil {
-		account.CompanyName = req.BusinessInfo.CompanyName
-		account.RegistrationNumber = req.BusinessInfo.RegistrationNumber
-		account.PIB = req.BusinessInfo.Pib
-		account.ActivityCode = req.BusinessInfo.ActivityCode
-		account.Address = req.BusinessInfo.Address
+		pib, err := strconv.ParseInt(req.BusinessInfo.Pib, 10, 64)
+		if err != nil {
+			return nil, status.Errorf(codes.InvalidArgument, "invalid PIB: %v", err)
+		}
+
+		// Provera da li firma već postoji preko PIB-a
+		existing, _ := s.GetCompanyByTaxCode(pib)
+
+		// Ako NE postoji, pokušavamo da je kreiramo
+		if existing == nil {
+			regID, err := strconv.ParseInt(req.BusinessInfo.RegistrationNumber, 10, 64)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid registration number: %v", err)
+			}
+
+			activityCode, err := strconv.ParseInt(req.BusinessInfo.ActivityCode, 10, 64)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "invalid activity code: %v", err)
+			}
+
+			company := Company{
+				Registered_id:    regID,
+				Name:             req.BusinessInfo.CompanyName,
+				Tax_code:         pib,
+				Activity_code_id: activityCode,
+				Address:          req.BusinessInfo.Address,
+				Owner_id:         req.ClientId,
+			}
+
+			_, err = s.CreateCompanyRecord(company)
+			if err != nil {
+				switch {
+				case errors.Is(err, ErrCompanyRegisteredIDExists):
+					// Logujemo ali ne prekidamo, jer ID već postoji
+					fmt.Printf("warning: company registration id already exists, skipping creation\n")
+				case errors.Is(err, ErrCompanyOwnerNotFound):
+					return nil, status.Error(codes.InvalidArgument, "owner does not exist")
+				case errors.Is(err, ErrCompanyActivityCodeNotFound):
+					return nil, status.Error(codes.InvalidArgument, "activity code does not exist")
+				default:
+					return nil, status.Error(codes.Internal, "company creation failed")
+				}
+			}
+		}
 	}
 
 	created, err := s.CreateAccountRecord(account)
@@ -378,7 +419,7 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 		AccountName:      created.Name,
 		OwnerId:          created.Owner,
 		Balance:          float64(created.Balance) / 100,
-		AvailableBalance: float64(created.Balance) / 100, // TODO: dodati kolonu u bazi za ovo ????
+		AvailableBalance: float64(created.Balance) / 100,
 		EmployeeId:       created.Created_by,
 		CreationDate:     created.Created_at.Format(time.RFC3339),
 		ExpirationDate:   created.Valid_until.Format(time.RFC3339),
