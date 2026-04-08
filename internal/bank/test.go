@@ -38,7 +38,7 @@ func newGormTestServer(t *testing.T) (*Server, sqlmock.Sqlmock, *sql.DB) {
 	return server, mock, db
 }
 
-func startNotificationTestServer(t *testing.T, handler notificationpb.NotificationServiceServer) (string, func()) {
+func _(t *testing.T, handler notificationpb.NotificationServiceServer) (string, func()) {
 	t.Helper()
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
