@@ -226,20 +226,18 @@ func (s *Server) CreateAccountRecord(account Account) (*Account, error) {
 		account.Number = number
 
 		row := tx.QueryRow(`
-			INSERT INTO accounts (
-				number, name, owner, balance, created_by, valid_until, currency, active,
-				owner_type, account_type, maintainance_cost, daily_limit, monthly_limit,
-				daily_expenditure, monthly_expenditure,
-				company_name, registration_number, pib, activity_code, address
-			)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-			RETURNING
-				id, number, name, owner, balance, created_by, created_at, valid_until,
-				currency, active, owner_type, account_type, maintainance_cost, daily_limit,
-				monthly_limit, daily_expenditure, monthly_expenditure,
-				company_name, registration_number, pib, activity_code, address
-		`,
-			account.Number, account.Name, account.Owner, account.Balance, account.Created_by,
+    INSERT INTO accounts (
+     number, name, owner, company_id, balance, created_by, valid_until, currency, active,
+     owner_type, account_type, maintainance_cost, daily_limit, monthly_limit,
+     daily_expenditure, monthly_expenditure
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+    RETURNING
+     id, number, name, owner, company_id, balance, created_by, created_at, valid_until,
+     currency, active, owner_type, account_type, maintainance_cost, daily_limit,
+     monthly_limit, daily_expenditure, monthly_expenditure
+   `,
+			account.Number, account.Name, account.Owner, account.CompanyID, account.Balance, account.Created_by,
 			account.Valid_until, account.Currency, account.Active, string(account.Owner_type),
 			string(account.Account_type), account.Maintainance_cost, dailyLimit, monthlyLimit,
 			account.Daily_expenditure, account.Monthly_expenditure,

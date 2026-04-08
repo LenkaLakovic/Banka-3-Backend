@@ -294,7 +294,6 @@ func (s *Server) mapToAccountProto(a Account) *bankpb.Account {
 	}
 }
 
-// CreateAccount orchestrates the account creation process and optional auto card creation.
 func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountRequest) (*bankpb.CreateAccountResponse, error) {
 	if err := validateCreateAccountInput(req); err != nil {
 		return nil, err
@@ -334,6 +333,7 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 	account := Account{
 		Name:              accountName,
 		Owner:             req.ClientId,
+		CompanyID:         nil,
 		Currency:          req.Currency,
 		Owner_type:        ownerType,
 		Account_type:      account_type(strings.ToLower(req.AccountType)),
@@ -354,8 +354,11 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 		// Provera da li firma već postoji preko PIB-a
 		existing, _ := s.GetCompanyByTaxCode(pib)
 
-		// Ako NE postoji, pokušavamo da je kreiramo
-		if existing == nil {
+		// Ako postoji, dedelimo ID i preskačemo kreiranje
+		if existing != nil {
+			account.CompanyID = &existing.Id
+		} else {
+			// Ako NE postoji, pokušavamo da je kreiramo
 			regID, err := strconv.ParseInt(req.BusinessInfo.RegistrationNumber, 10, 64)
 			if err != nil {
 				return nil, status.Errorf(codes.InvalidArgument, "invalid registration number: %v", err)
@@ -375,20 +378,11 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 				Owner_id:         req.ClientId,
 			}
 
-			_, err = s.CreateCompanyRecord(company)
+			createdCompany, err := s.CreateCompanyRecord(company)
 			if err != nil {
-				switch {
-				case errors.Is(err, ErrCompanyRegisteredIDExists):
-					// Logujemo ali ne prekidamo, jer ID već postoji
-					fmt.Printf("warning: company registration id already exists, skipping creation\n")
-				case errors.Is(err, ErrCompanyOwnerNotFound):
-					return nil, status.Error(codes.InvalidArgument, "owner does not exist")
-				case errors.Is(err, ErrCompanyActivityCodeNotFound):
-					return nil, status.Error(codes.InvalidArgument, "activity code does not exist")
-				default:
-					return nil, status.Error(codes.Internal, "company creation failed")
-				}
+				return nil, handleCompanyError(err)
 			}
+			account.CompanyID = &createdCompany.Id
 		}
 	}
 
@@ -398,17 +392,38 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 	}
 
 	if req.CreateCard {
-		_, cardErr := s.CreateCard(ctx, &bankpb.CreateCardRequest{
-			Email:         email,
-			AccountNumber: created.Number,
-			CardType:      req.CardType,
-			CardBrand:     req.CardBrand,
-		})
-		if cardErr != nil {
-			fmt.Printf("warning: card creation failed for %s: %v\n", created.Number, cardErr)
-		}
+		s.triggerCardCreation(ctx, email, created.Number, req)
 	}
 
+	return mapToCreateAccountResponse(created), nil
+}
+
+func handleCompanyError(err error) error {
+	switch {
+	case errors.Is(err, ErrCompanyRegisteredIDExists):
+		return status.Errorf(codes.AlreadyExists, "company registration id already exists")
+	case errors.Is(err, ErrCompanyOwnerNotFound):
+		return status.Error(codes.InvalidArgument, "owner does not exist")
+	case errors.Is(err, ErrCompanyActivityCodeNotFound):
+		return status.Error(codes.InvalidArgument, "activity code does not exist")
+	default:
+		return status.Error(codes.Internal, "company creation failed")
+	}
+}
+
+func (s *Server) triggerCardCreation(ctx context.Context, email, accNum string, req *bankpb.CreateAccountRequest) {
+	_, err := s.CreateCard(ctx, &bankpb.CreateCardRequest{
+		Email:         email,
+		AccountNumber: accNum,
+		CardType:      req.CardType,
+		CardBrand:     req.CardBrand,
+	})
+	if err != nil {
+		fmt.Printf("warning: card creation failed for %s: %v\n", accNum, err)
+	}
+}
+
+func mapToCreateAccountResponse(created *Account) *bankpb.CreateAccountResponse {
 	statusStr := "Neaktivan"
 	if created.Active {
 		statusStr = "Aktivan"
@@ -430,7 +445,7 @@ func (s *Server) CreateAccount(ctx context.Context, req *bankpb.CreateAccountReq
 		MonthlyLimit:     float64(created.Monthly_limit),
 		DailySpending:    float64(created.Daily_expenditure),
 		MonthlySpending:  float64(created.Monthly_expenditure),
-	}, nil
+	}
 }
 
 func validateCreateAccountInput(req *bankpb.CreateAccountRequest) error {

@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     number              VARCHAR(20)     NOT NULL,
     name                VARCHAR(127)    NOT NULL,
     owner               BIGINT          NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    company_id          BIGINT          DEFAULT NULL REFERENCES companies(id) ON DELETE CASCADE,
     balance             BIGINT          NOT NULL DEFAULT 0,
     created_by          BIGINT          REFERENCES employees(id) ON DELETE SET NULL,
     created_at          DATE            NOT NULL DEFAULT CURRENT_DATE,
