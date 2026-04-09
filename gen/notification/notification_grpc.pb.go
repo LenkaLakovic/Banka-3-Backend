@@ -19,15 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NotificationService_SendConfirmationEmail_FullMethodName       = "/notification.NotificationService/SendConfirmationEmail"
-	NotificationService_SendActivationEmail_FullMethodName         = "/notification.NotificationService/SendActivationEmail"
-	NotificationService_SendPasswordResetEmail_FullMethodName      = "/notification.NotificationService/SendPasswordResetEmail"
-	NotificationService_SendInitialPasswordSetEmail_FullMethodName = "/notification.NotificationService/SendInitialPasswordSetEmail"
-	NotificationService_SendCardConfirmationEmail_FullMethodName   = "/notification.NotificationService/SendCardConfirmationEmail"
-	NotificationService_SendCardCreatedEmail_FullMethodName        = "/notification.NotificationService/SendCardCreatedEmail"
-	NotificationService_SendLoanRequestCreatedEmail_FullMethodName = "/notification.NotificationService/SendLoanRequestCreatedEmail"
-	NotificationService_SendLoanPaymentFailedEmail_FullMethodName  = "/notification.NotificationService/SendLoanPaymentFailedEmail"
-	NotificationService_SendTOTPDisableEmail_FullMethodName        = "/notification.NotificationService/SendTOTPDisableEmail"
+	NotificationService_SendConfirmationEmail_FullMethodName        = "/notification.NotificationService/SendConfirmationEmail"
+	NotificationService_SendActivationEmail_FullMethodName          = "/notification.NotificationService/SendActivationEmail"
+	NotificationService_SendPasswordResetEmail_FullMethodName       = "/notification.NotificationService/SendPasswordResetEmail"
+	NotificationService_SendInitialPasswordSetEmail_FullMethodName  = "/notification.NotificationService/SendInitialPasswordSetEmail"
+	NotificationService_SendCardConfirmationEmail_FullMethodName    = "/notification.NotificationService/SendCardConfirmationEmail"
+	NotificationService_SendCardCreatedEmail_FullMethodName         = "/notification.NotificationService/SendCardCreatedEmail"
+	NotificationService_SendLoanRequestCreatedEmail_FullMethodName  = "/notification.NotificationService/SendLoanRequestCreatedEmail"
+	NotificationService_SendCardBlockedEmail_FullMethodName         = "/notification.NotificationService/SendCardBlockedEmail"
+	NotificationService_SendLoanPaymentFailedEmail_FullMethodName   = "/notification.NotificationService/SendLoanPaymentFailedEmail"
+	NotificationService_SendTOTPDisableEmail_FullMethodName         = "/notification.NotificationService/SendTOTPDisableEmail"
+	NotificationService_SendBankAccountCreationEmail_FullMethodName = "/notification.NotificationService/SendBankAccountCreationEmail"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -41,8 +43,10 @@ type NotificationServiceClient interface {
 	SendCardConfirmationEmail(ctx context.Context, in *CardConfirmationMailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	SendCardCreatedEmail(ctx context.Context, in *CardCreatedMailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	SendLoanRequestCreatedEmail(ctx context.Context, in *LoanRequestCreatedMailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
+	SendCardBlockedEmail(ctx context.Context, in *CardBlockedReqest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	SendLoanPaymentFailedEmail(ctx context.Context, in *LoanPaymentFailedMailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	SendTOTPDisableEmail(ctx context.Context, in *SendTOTPDisableEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
+	SendBankAccountCreationEmail(ctx context.Context, in *SendBankAccountCreationEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -123,6 +127,16 @@ func (c *notificationServiceClient) SendLoanRequestCreatedEmail(ctx context.Cont
 	return out, nil
 }
 
+func (c *notificationServiceClient) SendCardBlockedEmail(ctx context.Context, in *CardBlockedReqest, opts ...grpc.CallOption) (*SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SuccessResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendCardBlockedEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *notificationServiceClient) SendLoanPaymentFailedEmail(ctx context.Context, in *LoanPaymentFailedMailRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SuccessResponse)
@@ -143,6 +157,16 @@ func (c *notificationServiceClient) SendTOTPDisableEmail(ctx context.Context, in
 	return out, nil
 }
 
+func (c *notificationServiceClient) SendBankAccountCreationEmail(ctx context.Context, in *SendBankAccountCreationEmailRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SuccessResponse)
+	err := c.cc.Invoke(ctx, NotificationService_SendBankAccountCreationEmail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
@@ -154,8 +178,10 @@ type NotificationServiceServer interface {
 	SendCardConfirmationEmail(context.Context, *CardConfirmationMailRequest) (*SuccessResponse, error)
 	SendCardCreatedEmail(context.Context, *CardCreatedMailRequest) (*SuccessResponse, error)
 	SendLoanRequestCreatedEmail(context.Context, *LoanRequestCreatedMailRequest) (*SuccessResponse, error)
+	SendCardBlockedEmail(context.Context, *CardBlockedReqest) (*SuccessResponse, error)
 	SendLoanPaymentFailedEmail(context.Context, *LoanPaymentFailedMailRequest) (*SuccessResponse, error)
 	SendTOTPDisableEmail(context.Context, *SendTOTPDisableEmailRequest) (*SuccessResponse, error)
+	SendBankAccountCreationEmail(context.Context, *SendBankAccountCreationEmailRequest) (*SuccessResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -187,11 +213,17 @@ func (UnimplementedNotificationServiceServer) SendCardCreatedEmail(context.Conte
 func (UnimplementedNotificationServiceServer) SendLoanRequestCreatedEmail(context.Context, *LoanRequestCreatedMailRequest) (*SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendLoanRequestCreatedEmail not implemented")
 }
+func (UnimplementedNotificationServiceServer) SendCardBlockedEmail(context.Context, *CardBlockedReqest) (*SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SendCardBlockedEmail not implemented")
+}
 func (UnimplementedNotificationServiceServer) SendLoanPaymentFailedEmail(context.Context, *LoanPaymentFailedMailRequest) (*SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendLoanPaymentFailedEmail not implemented")
 }
 func (UnimplementedNotificationServiceServer) SendTOTPDisableEmail(context.Context, *SendTOTPDisableEmailRequest) (*SuccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SendTOTPDisableEmail not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendBankAccountCreationEmail(context.Context, *SendBankAccountCreationEmailRequest) (*SuccessResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SendBankAccountCreationEmail not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -340,6 +372,24 @@ func _NotificationService_SendLoanRequestCreatedEmail_Handler(srv interface{}, c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_SendCardBlockedEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CardBlockedReqest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendCardBlockedEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendCardBlockedEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendCardBlockedEmail(ctx, req.(*CardBlockedReqest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _NotificationService_SendLoanPaymentFailedEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LoanPaymentFailedMailRequest)
 	if err := dec(in); err != nil {
@@ -372,6 +422,24 @@ func _NotificationService_SendTOTPDisableEmail_Handler(srv interface{}, ctx cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NotificationServiceServer).SendTOTPDisableEmail(ctx, req.(*SendTOTPDisableEmailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_SendBankAccountCreationEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendBankAccountCreationEmailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendBankAccountCreationEmail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_SendBankAccountCreationEmail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendBankAccountCreationEmail(ctx, req.(*SendBankAccountCreationEmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -412,12 +480,20 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NotificationService_SendLoanRequestCreatedEmail_Handler,
 		},
 		{
+			MethodName: "SendCardBlockedEmail",
+			Handler:    _NotificationService_SendCardBlockedEmail_Handler,
+		},
+		{
 			MethodName: "SendLoanPaymentFailedEmail",
 			Handler:    _NotificationService_SendLoanPaymentFailedEmail_Handler,
 		},
 		{
 			MethodName: "SendTOTPDisableEmail",
 			Handler:    _NotificationService_SendTOTPDisableEmail_Handler,
+		},
+		{
+			MethodName: "SendBankAccountCreationEmail",
+			Handler:    _NotificationService_SendBankAccountCreationEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
